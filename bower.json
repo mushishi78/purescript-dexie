@@ -1,0 +1,18 @@
+{
+    "name": "purescript-dexie",
+    "homepage": "https://github.com/mushishi78/purescript-dexie",
+    "license": "MIT",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/mushishi78/purescript-dexie.git"
+    },
+    "ignore": [
+      "bower_components",
+      "node_modules",
+      "output",
+      "bower.json",
+      "package.json"
+    ],
+    "dependencies": {
+    }
+}
