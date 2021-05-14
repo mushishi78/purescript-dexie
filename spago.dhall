@@ -14,7 +14,6 @@
   , "refs"
   , "strings"
   , "test-unit"
-  , "toppokki"
   , "transformers"
   ]
 , packages = ./packages.dhall

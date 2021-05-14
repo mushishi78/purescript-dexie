@@ -1,13 +1,13 @@
 {
   "private": true,
   "scripts": {
-    "build-test-client": "esbuild output/Test.Client/index.js --bundle --outfile=test/client.js",
-    "test": "spago build && npm run build-test-client && spago test"
+    "bundle-tests": "spago build && esbuild test/run.js --bundle --outfile=test/run.bundled.js",
+    "serve-tests": "cd test && http-server"
   },
   "devDependencies": {
     "esbuild": "^0.11.20",
+    "http-server": "^0.12.3",
     "pulp": "^15.0.0",
-    "puppeteer": "^9.1.1",
     "purescript-psa": "^0.8.2",
     "rimraf": "^3.0.2"
   }
