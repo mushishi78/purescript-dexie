@@ -5,3 +5,4 @@ package-lock.json
 /node_modules/
 /output/
 /generated-docs/
+/test/client.js
