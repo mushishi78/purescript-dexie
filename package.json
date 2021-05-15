@@ -5,8 +5,10 @@
     "serve-tests": "cd test && http-server"
   },
   "devDependencies": {
+    "dexie": "^3.0.3",
     "esbuild": "^0.11.20",
     "http-server": "^0.12.3",
+    "prettier": "^2.3.0",
     "pulp": "^15.0.0",
     "purescript-psa": "^0.8.2",
     "rimraf": "^3.0.2"
