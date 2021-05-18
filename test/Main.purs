@@ -4,30 +4,57 @@ import Prelude
 
 import Data.Foldable (traverse_)
 import Dexie as Dexie
+import Dexie.DB (DB)
 import Dexie.DB as DB
 import Dexie.Table as Table
 import Dexie.Version as Version
 import Effect (Effect)
-import Effect.Aff (Aff)
-import Effect.Class (liftEffect)
+import Effect.Aff (Aff, bracket, launchAff_)
 import Foreign (unsafeToForeign)
 import Foreign.Object as Object
-import Test.Unit (suite, test)
+import Test.Unit (Test, suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
 
 main :: Effect Unit
 main = runTest do
   suite "basic usage" do
-    test "can write data to indexed db" do
-      cleanup
+    test "can write data to indexed db" $ withCleanDB "db" $ \db -> do
+      DB.version 1 db
+        >>= Version.stores (Object.singleton "foo" "id")
+        # void
 
-      db <- liftEffect (Dexie.new "db")
-      _ <- liftEffect $ DB.version 1 db >>= Version.stores (Object.singleton "foo" "id")
-      _ <- liftEffect (DB.table "foo" db) >>= Table.add (unsafeToForeign { id: 1, name: "John" })
+      add db "foo" { id: 1, name: "John" }
 
-      pure unit
+    test "can make an upgrade migration" $ do
+      cleanUp
+
+      -- Move off version 0
+      withDB "db" $ \db -> do
+        DB.version 1 db # void
+        DB.open db
+
+      -- Migrate from 1 -> 2
+      withDB "db" $ \db -> do
+        DB.version 2 db
+          >>= Version.stores (Object.singleton "foo" "id")
+          >>= Version.upgrade (\_ -> launchAff_ (add db "foo" { id: 1, name: "John" }))
+          # void
+
+        DB.open db
 
 
-cleanup :: Aff Unit
-cleanup = Dexie.getDatabaseNames >>= traverse_ Dexie.delete
+cleanUp :: Aff Unit
+cleanUp = Dexie.getDatabaseNames >>= traverse_ Dexie.delete
+
+withCleanDB :: String -> (DB -> Test) -> Test
+withCleanDB dbName fn = cleanUp *> withDB dbName fn
+
+withDB :: String -> (DB -> Test) -> Test
+withDB dbName = bracket (Dexie.new dbName) DB.close 
+
+add :: forall a. DB -> String -> a -> Aff Unit
+add db storeName item = do
+  DB.table storeName db
+    >>= Table.add (unsafeToForeign item)
+    # void

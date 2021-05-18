@@ -5,20 +5,30 @@ import Prelude
 import Control.Promise (Promise, toAffE)
 import Dexie.DB (DB)
 import Effect (Effect)
-import Effect.Aff (Aff)
+import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Class (class MonadEffect, liftEffect)
 
-foreign import new :: String -> Effect DB
+foreign import newImpl :: String -> Effect DB
 foreign import deleteImpl :: String -> Effect (Promise Unit)
 foreign import getDatabaseNamesImpl :: Effect (Promise (Array String))
 foreign import existsImpl :: String -> Effect (Promise Boolean)
-foreign import getDebug :: Effect (Boolean)
-foreign import setDebug :: Boolean -> Effect Unit
+foreign import getDebugImpl :: Effect (Boolean)
+foreign import setDebugImpl :: Boolean -> Effect Unit
 
-delete :: String -> Aff Unit
-delete dbName = toAffE $ deleteImpl dbName
+new :: forall m. MonadEffect m => String -> m DB
+new dbName = liftEffect $ newImpl dbName
 
-getDatabaseNames :: Aff (Array String)
-getDatabaseNames = toAffE getDatabaseNamesImpl
+delete :: forall m. MonadAff m => String -> m Unit
+delete dbName = liftAff $ toAffE $ deleteImpl dbName
 
-exists :: String -> Aff Boolean
-exists dbName = toAffE $ existsImpl dbName
+getDatabaseNames :: forall m. MonadAff m => m (Array String)
+getDatabaseNames = liftAff $ toAffE getDatabaseNamesImpl
+
+exists :: forall m. MonadAff m => String -> m Boolean
+exists dbName = liftAff $ toAffE $ existsImpl dbName
+
+getDebug :: forall m. MonadEffect m => m (Boolean)
+getDebug = liftEffect getDebugImpl
+
+setDebug :: forall m. MonadEffect m => Boolean -> m Unit
+setDebug isDebugging = liftEffect $ setDebugImpl isDebugging

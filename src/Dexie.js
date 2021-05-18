@@ -1,6 +1,6 @@
 var Dexie = require('dexie')
 
-exports.new = function (dbName) {
+exports.newImpl = function (dbName) {
   return function () {
     return new Dexie(dbName)
   }
@@ -22,11 +22,11 @@ exports.existsImpl = function (dbName) {
   }
 }
 
-exports.getDebug = function () {
+exports.getDebugImpl = function () {
   return Dexie.debug
 }
 
-exports.setDebug = function (isDebug) {
+exports.setDebugImpl = function (isDebug) {
   return function () {
     Dexie.debug = isDebug
   }
