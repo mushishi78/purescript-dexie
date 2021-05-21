@@ -3,17 +3,18 @@ module Dexie.Table where
 import Prelude
 
 import Control.Promise (Promise, toAffE)
+import Data.Maybe (Maybe)
+import Data.Nullable (Nullable, toNullable)
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff, liftAff)
-import Foreign (Foreign)
+import Foreign (Foreign, unsafeFromForeign, unsafeToForeign)
 
 foreign import data Table :: Type
 
-foreign import addImpl :: Foreign -> Table -> Effect (Promise Foreign)
-foreign import addWithKeyImpl :: Foreign -> Foreign -> Table -> Effect (Promise Foreign)
+foreign import addImpl :: Foreign -> Nullable Foreign -> Table -> Effect (Promise Foreign)
 
-add :: forall m. MonadAff m => Foreign -> Table -> m Foreign
-add item table = liftAff $ toAffE $ addImpl item table
-
-addWithKey :: forall m. MonadAff m => Foreign -> Foreign -> Table -> m Foreign
-addWithKey item key table = liftAff $ toAffE $ addWithKeyImpl item key table
+add :: forall ma item key. MonadAff ma => item -> Maybe key -> Table -> ma key
+add item maybeKey table = liftAff $ map unsafeFromForeign $ toAffE $ addImpl foreignItem foreignKey table
+  where
+    foreignItem = unsafeToForeign item
+    foreignKey = toNullable $ map unsafeToForeign maybeKey

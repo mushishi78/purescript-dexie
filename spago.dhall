@@ -12,6 +12,7 @@
   , "maybe"
   , "node-buffer"
   , "node-process"
+  , "nullable"
   , "prelude"
   , "psci-support"
   , "refs"
