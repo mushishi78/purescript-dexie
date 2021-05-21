@@ -15,15 +15,23 @@ foreign import versionImpl :: Int -> DB -> Effect Version
 foreign import tableImpl :: String -> DB -> Effect Table
 foreign import openImpl :: DB -> Effect (Promise Unit)
 foreign import closeImpl :: DB -> Effect Unit
+foreign import onBlockedImpl :: Effect Unit -> DB -> Effect Unit
+foreign import onVersionChangeImpl :: Effect Unit -> DB -> Effect Unit
 
-version :: forall m. MonadEffect m => Int -> DB -> m Version
+version :: forall me. MonadEffect me => Int -> DB -> me Version
 version versionNumber db = liftEffect $ versionImpl versionNumber db
 
-table :: forall m. MonadEffect m => String -> DB -> m Table
+table :: forall me. MonadEffect me => String -> DB -> me Table
 table storeName db = liftEffect $ tableImpl storeName db
 
-open :: forall m. MonadAff m => DB -> m Unit
+open :: forall ma. MonadAff ma => DB -> ma Unit
 open db = liftAff $ toAffE $ openImpl db
 
-close :: forall m. MonadEffect m => DB -> m Unit
+close :: forall me. MonadEffect me => DB -> me Unit
 close db = liftEffect $ closeImpl db
+
+onBlocked :: forall me. MonadEffect me => Effect Unit -> DB -> me Unit
+onBlocked callback db = liftEffect $ onBlockedImpl callback db
+
+onVersionChange :: forall me. MonadEffect me => Effect Unit -> DB -> me Unit
+onVersionChange callback db = liftEffect $ onVersionChangeImpl callback db

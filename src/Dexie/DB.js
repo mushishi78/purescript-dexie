@@ -25,3 +25,19 @@ exports.closeImpl = function (db) {
     return db.close()
   }
 }
+
+exports.onBlockedImpl = function (callback) {
+  return function (db) {
+    return function () {
+      return db.on('blocked', callback)
+    }
+  }
+}
+
+exports.onVersionChangeImpl = function (callback) {
+  return function (db) {
+    return function () {
+      return db.on('versionchange', callback)
+    }
+  }
+}
