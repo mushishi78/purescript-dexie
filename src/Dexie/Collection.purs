@@ -3,7 +3,7 @@ module Dexie.Collection where
 import Prelude
 
 import Control.Promise (Promise, toAffE)
-import Dexie.Where (Where)
+import Dexie.WhereClause (WhereClause)
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -27,7 +27,7 @@ foreign import lastImpl :: Collection -> Effect (Promise Foreign)
 foreign import limitImpl :: Collection -> Effect Collection
 foreign import modifyImpl :: Foreign -> Collection -> Effect Collection
 foreign import offsetImpl :: Collection -> Effect Collection
-foreign import orImpl :: String -> Collection -> Effect Where
+foreign import orImpl :: String -> Collection -> Effect WhereClause
 foreign import primaryKeysImpl :: Collection -> Effect (Promise (Array Foreign))
 foreign import rawImpl :: Collection -> Effect Collection
 foreign import reverseImpl :: Collection -> Effect Collection
@@ -84,7 +84,7 @@ modify fnOrObject collection = liftEffect $ modifyImpl fnOrObject collection
 offset :: forall me. MonadEffect me => Collection -> me Collection
 offset collection = liftEffect $ offsetImpl collection
 
-or :: forall me. MonadEffect me => String -> Collection -> me Where
+or :: forall me. MonadEffect me => String -> Collection -> me WhereClause
 or index collection = liftEffect $ orImpl index collection
 
 primaryKeys :: forall ma. MonadAff ma => Collection -> ma (Array Foreign)
