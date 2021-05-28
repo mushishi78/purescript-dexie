@@ -1,4 +1,12 @@
-module Dexie.DB where
+module Dexie.DB (
+    DB,
+    version,
+    table,
+    open,
+    close,
+    onBlocked,
+    onVersionChange
+) where
 
 import Prelude
 

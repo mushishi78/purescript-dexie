@@ -1,4 +1,35 @@
-module Dexie.Table where
+module Dexie.Table (
+    OnCreatingArgs,
+    OnDeletingArgs,
+    OnUpdatingArgs,
+    Table,
+    add,
+    bulkAdd,
+    bulkDelete,
+    bulkGet,
+    bulkPut,
+    clear,
+    count,
+    delete,
+    each,
+    filter,
+    get,
+    onCreating,
+    onDeleting,
+    onReading,
+    onUpdating,
+    limit,
+    name,
+    offset,
+    orderBy,
+    put,
+    reverse,
+    toArray,
+    toCollection,
+    update,
+    whereClause,
+    whereValues
+) where
 
 import Prelude
 

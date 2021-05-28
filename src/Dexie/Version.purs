@@ -1,4 +1,8 @@
-module Dexie.Version where
+module Dexie.Version (
+    Version,
+    stores,
+    upgrade
+) where
 
 import Prelude
 

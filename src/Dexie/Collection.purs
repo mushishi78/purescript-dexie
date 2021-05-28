@@ -1,4 +1,30 @@
-module Dexie.Collection where
+module Dexie.Collection (
+    Collection,
+    and,
+    clone,
+    count,
+    delete,
+    distinct,
+    each,
+    eachKey,
+    eachPrimaryKey,
+    eachUniqueKey,
+    filter,
+    first,
+    keys,
+    last,
+    limit,
+    modify,
+    offset,
+    or,
+    primaryKeys,
+    raw,
+    reverse,
+    sortBy,
+    toArray,
+    uniqueKeys,
+    until
+) where
 
 import Prelude
 

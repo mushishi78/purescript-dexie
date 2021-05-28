@@ -1,4 +1,11 @@
-module Dexie where
+module Dexie (
+    new,
+    delete,
+    getDatabaseNames,
+    exists,
+    getDebug,
+    setDebug
+) where
 
 import Prelude
 
