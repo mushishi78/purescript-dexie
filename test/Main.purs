@@ -35,7 +35,7 @@ main = runTest do
 
       -- Check it equals what we'd expect
       unsafeGet 1 table
-        >>= Assert.equal (Just { id: 1, name: "John" }) 
+        >>= Assert.equal (Just { id: 1, name: "John" })
 
     test "can make an upgrade migration" $ do
       cleanUp
@@ -62,7 +62,7 @@ main = runTest do
         -- Check that row is there
         DB.table "foo" db
           >>= unsafeGet 1
-          >>= Assert.equal (Just { id: 1, name: "John" }) 
+          >>= Assert.equal (Just { id: 1, name: "John" })
 
     test "can write with an non-inbound key" $ withCleanDB "db" $ \db -> do
       DB.version 1 db
@@ -79,7 +79,7 @@ main = runTest do
       maybeValue <- unsafeGet 1 table
 
       -- Check it equals what we'd expect
-      Assert.equal (Just { name: "John" }) maybeValue 
+      Assert.equal (Just { name: "John" }) maybeValue
 
 cleanUp :: Aff Unit
 cleanUp = Dexie.getDatabaseNames >>= traverse_ Dexie.delete
@@ -88,7 +88,7 @@ withCleanDB :: String -> (DB -> Test) -> Test
 withCleanDB dbName fn = cleanUp *> withDB dbName fn
 
 withDB :: String -> (DB -> Test) -> Test
-withDB dbName = bracket (Dexie.new dbName) DB.close 
+withDB dbName = bracket (Dexie.new dbName) DB.close
 
 add_ :: forall a b. a -> Maybe b -> Table -> Aff Unit
 add_ item maybeKey table = Table.add item maybeKey table # void
