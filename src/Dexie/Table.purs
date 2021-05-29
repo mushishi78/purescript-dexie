@@ -28,7 +28,8 @@ module Dexie.Table (
     toCollection,
     update,
     whereClause,
-    whereValues
+    whereValues,
+    add_
 ) where
 
 import Prelude
@@ -197,3 +198,8 @@ whereClause key = liftEffect $ whereClauseImpl (unsafeToForeign key)
 
 whereValues :: forall me values. MonadEffect me => values -> me Collection
 whereValues values = liftEffect $ whereValuesImpl (unsafeToForeign values)
+
+-- Helpers
+
+add_ :: forall ma a b. MonadAff ma => a -> Maybe b -> Table -> ma Unit
+add_ item maybeKey table = add item maybeKey table # void
