@@ -3,6 +3,7 @@
   [ "aff"
   , "aff-promise"
   , "effect"
+  , "either"
   , "foldable-traversable"
   , "foreign"
   , "foreign-object"
