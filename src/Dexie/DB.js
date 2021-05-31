@@ -34,6 +34,14 @@ exports.onBlockedImpl = function (callback) {
   }
 }
 
+exports.onReadyImpl = function (callback) {
+  return function (db) {
+    return function () {
+      return db.on('ready', callback)
+    }
+  }
+}
+
 exports.onVersionChangeImpl = function (callback) {
   return function (db) {
     return function () {
