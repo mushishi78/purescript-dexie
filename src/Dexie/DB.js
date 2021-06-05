@@ -14,6 +14,20 @@ exports.tableImpl = function (storeName) {
   }
 }
 
+exports.transactionImpl = function (db) {
+  return function (mode) {
+    return function (tables) {
+      return function (callback) {
+        return function () {
+          return db.transaction(mode, tables, function (transaction) {
+            return callback(transaction)()
+          })
+        }
+      }
+    }
+  }
+}
+
 exports.openImpl = function (db) {
   return function () {
     return db.open()

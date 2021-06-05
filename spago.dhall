@@ -4,6 +4,7 @@
   , "aff-promise"
   , "effect"
   , "either"
+  , "exceptions"
   , "foldable-traversable"
   , "foreign"
   , "foreign-object"

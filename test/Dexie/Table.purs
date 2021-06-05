@@ -1,6 +1,5 @@
 module Test.Dexie.Table where
 
-
 import Prelude
 
 import Data.Maybe (Maybe(..))
