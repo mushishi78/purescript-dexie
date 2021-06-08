@@ -12,7 +12,7 @@ import Effect.Aff (try)
 import Effect.Class (liftEffect)
 import Effect.Exception (throwException, error)
 import Foreign.Object as Object
-import Test.Helpers (assertEqual, assert, delay, withCleanDB)
+import Test.Helpers (assert, assertEqual, delay, withCleanDB)
 import Test.Unit (TestSuite, suite, test)
 
 transactionTests :: TestSuite
@@ -56,3 +56,23 @@ transactionTests = suite "transaction" do
     -- Check that foo has 4 rows at the end
     Promise.join p # void
     assertEqual 4 =<< Table.count foo
+
+  test "cannot make concurrent read if in a transaction" $ withCleanDB "db" $ \db -> Promise.toAff $ do
+    DB.version 1 db
+      >>= Version.stores (Object.singleton "foo" "++")
+      # void
+
+    -- Start writing to foo in transaction but don't wait
+    void $ Promise.launch $ DB.transaction db "rw" ["foo"] \trnx -> do
+      foo <- Transaction.table "foo" trnx
+      Table.add_ "One" Nothing foo
+      Table.add_ "Two" Nothing foo
+      Table.add_ "Three" Nothing foo
+      Table.add_ "Four" Nothing foo
+
+    -- Check that you can't read from foo whilst in progress
+    assertEqual 0 =<< Table.count =<< DB.table "foo" db
+
+    -- Check that you can't read from foo until the whole transaction has committed
+    delay 1.0
+    assertEqual 4 =<< Table.count =<< DB.table "foo" db
