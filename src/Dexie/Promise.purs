@@ -14,6 +14,7 @@ import Effect.Exception (Error)
 
 -- | Represents a thunk to create a Dexie Promise
 foreign import data Promise :: Type -> Type
+foreign import data LaunchedPromise :: Type -> Type
 
 foreign import new :: forall v. ((v -> Effect Unit) -> (Error -> Effect Unit) -> Effect Unit) -> Promise v
 foreign import all :: forall v. Array (Promise v) -> Promise (Array v)
@@ -26,7 +27,8 @@ foreign import reject :: forall v. Error -> Promise v
 foreign import resolve :: forall v. v -> Promise v
 foreign import _then :: forall v1 v2. (v1 -> Promise v2) -> Promise v1 -> Promise v2
 foreign import _liftEffect :: forall v. Effect v -> Promise v
-foreign import _launchPromise :: Promise Unit -> Effect Unit
+foreign import _launch :: forall v. Promise v -> Effect (LaunchedPromise v)
+foreign import _join :: forall v. LaunchedPromise v -> Promise v
 
 instance functorPromise :: Functor Promise where
   map fn = _then (fn >>> pure)
@@ -60,14 +62,18 @@ instance monadErrorPromise ∷ MonadError Error Promise where
 instance monadEffectPromise ∷ MonadEffect Promise where
   liftEffect = _liftEffect
 
-launchPromise :: forall me. MonadEffect me => Promise Unit -> me Unit
-launchPromise promise = liftEffect $ _launchPromise promise
+launch :: forall v me. MonadEffect me => Promise v -> me (LaunchedPromise v)
+launch promise = liftEffect $ _launch promise
+
+join :: forall v. LaunchedPromise v -> Promise v
+join = _join
 
 toAff :: forall a ma. MonadAff ma => Promise a -> ma a
 toAff promise = liftAff $ makeAff $ \cb -> do
   promise
-    # _then (\v -> mempty <$ _liftEffect (cb (Right v)))
+    # _then (\v -> pure unit <* _liftEffect (cb (Right v)))
     # catch (\e -> mempty <$ _liftEffect (cb (Left e)))
-    # _launchPromise
+    # launch
+    # void
 
   mempty

@@ -120,6 +120,12 @@ exports._liftEffect = function (thunk) {
   }
 }
 
-exports._launchPromise = function (thunk) {
+exports._launch = function (thunk) {
   return thunk
+}
+
+exports._join = function (launchedPromise) {
+  return function () {
+    return launchedPromise
+  }
 }
