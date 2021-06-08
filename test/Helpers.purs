@@ -12,7 +12,8 @@ import Dexie.Promise (Promise)
 import Dexie.Promise as Promise
 import Dexie.Table (Table)
 import Dexie.Table as Table
-import Effect.Aff (Aff, bracket, runAff_)
+import Effect.Aff (Aff, Milliseconds(..), bracket, runAff_)
+import Effect.Aff as Aff
 import Foreign (unsafeFromForeign)
 import Test.Unit (Test)
 import Test.Unit.Assert as Assert
@@ -36,3 +37,6 @@ unsafeUseAff aff = Promise.new $ \resolve reject -> (flip $ runAff_) aff $ case 
 
 assertEqual :: forall a. Eq a ⇒ Show a ⇒ a → a → Promise Unit
 assertEqual a b = unsafeUseAff $ Assert.equal a b
+
+delay :: Number -> Promise Unit
+delay milliseconds = unsafeUseAff $ Aff.delay (Milliseconds milliseconds)

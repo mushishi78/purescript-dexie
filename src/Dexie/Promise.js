@@ -11,12 +11,31 @@ function triggerThunks(promiseThunks) {
   return promiseThunks.map(promiseThunk => promiseThunk())
 }
 
+function WrappedPromise(promise) {
+  this.promise = promise
+}
+
+// Avoid flattening promises by wrapping them first
+function wrapIfPromise(value) {
+  if (value == null) return value
+  if (value instanceof Dexie.Promise || typeof value.then === 'function') {
+    return new WrappedPromise(value)
+  }
+  return value
+}
+
+function unwrap(value) {
+  if (value == null) return value
+  if (value instanceof WrappedPromise) return value.promise
+  return value
+}
+
 exports.new = function (callback) {
   return function () {
-    return new Promise(function (resolve, reject) {
+    return new Dexie.Promise(function (resolve, reject) {
       callback(function (value) {
         return function () {
-          resolve(value)
+          resolve(wrapIfPromise(value))
         }
       })(function (error) {
         return function () {
@@ -81,7 +100,7 @@ exports.reject = function (error) {
 
 exports.resolve = function (value) {
   return function () {
-    return Dexie.Promise.resolve(value)
+    return Dexie.Promise.resolve(wrapIfPromise(value))
   }
 }
 
@@ -89,7 +108,7 @@ exports._then = function (fn) {
   return function (promiseThunk) {
     return function () {
       return promiseThunk().then(function (value) {
-        return fn(value)()
+        return fn(unwrap(value))()
       })
     }
   }
@@ -97,7 +116,7 @@ exports._then = function (fn) {
 
 exports._liftEffect = function (thunk) {
   return function () {
-    return Dexie.Promise.resolve(thunk())
+    return Dexie.Promise.resolve(wrapIfPromise(thunk()))
   }
 }
 

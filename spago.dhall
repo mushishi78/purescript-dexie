@@ -12,6 +12,7 @@
   , "nullable"
   , "prelude"
   , "psci-support"
+  , "refs"
   , "test-unit"
   , "transformers"
   ]
