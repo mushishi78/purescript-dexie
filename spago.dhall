@@ -1,7 +1,7 @@
 { name = "dexie"
 , dependencies =
   [ "aff"
-  , "aff-promise"
+  , "control"
   , "effect"
   , "either"
   , "exceptions"
@@ -13,6 +13,7 @@
   , "prelude"
   , "psci-support"
   , "test-unit"
+  , "transformers"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

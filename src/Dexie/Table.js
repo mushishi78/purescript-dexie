@@ -1,4 +1,4 @@
-exports.addImpl = function (item) {
+exports._add = function (item) {
   return function (nullableKey) {
     return function (table) {
       return function () {
@@ -8,7 +8,7 @@ exports.addImpl = function (item) {
   }
 }
 
-exports.bulkAddImpl = function (items) {
+exports._bulkAdd = function (items) {
   return function (nullableKeys) {
     return function (table) {
       return function () {
@@ -18,7 +18,7 @@ exports.bulkAddImpl = function (items) {
   }
 }
 
-exports.bulkDeleteImpl = function (keys) {
+exports._bulkDelete = function (keys) {
   return function (table) {
     return function () {
       return table.bulkDelete(keys)
@@ -26,7 +26,7 @@ exports.bulkDeleteImpl = function (keys) {
   }
 }
 
-exports.bulkGetImpl = function (keys) {
+exports._bulkGet = function (keys) {
   return function (table) {
     return function () {
       return table.bulkGet(keys)
@@ -34,7 +34,7 @@ exports.bulkGetImpl = function (keys) {
   }
 }
 
-exports.bulkPutImpl = function (items) {
+exports._bulkPut = function (items) {
   return function (nullableKeys) {
     return function (table) {
       return function () {
@@ -44,19 +44,19 @@ exports.bulkPutImpl = function (items) {
   }
 }
 
-exports.clearImpl = function (table) {
+exports._clear = function (table) {
   return function () {
     return table.clear()
   }
 }
 
-exports.countImpl = function (table) {
+exports._count = function (table) {
   return function () {
     return table.count()
   }
 }
 
-exports.deleteImpl = function (key) {
+exports._delete = function (key) {
   return function (table) {
     return function () {
       return table.delete(key)
@@ -64,7 +64,7 @@ exports.deleteImpl = function (key) {
   }
 }
 
-exports.eachImpl = function (callback) {
+exports._each = function (callback) {
   return function (table) {
     return function () {
       return table.each(function (item) {
@@ -74,7 +74,7 @@ exports.eachImpl = function (callback) {
   }
 }
 
-exports.filterImpl = function (filterFn) {
+exports._filter = function (filterFn) {
   return function (table) {
     return function () {
       return table.filter(filterFn)
@@ -82,7 +82,7 @@ exports.filterImpl = function (filterFn) {
   }
 }
 
-exports.getImpl = function (indexQuery) {
+exports._get = function (indexQuery) {
   return function (table) {
     return function () {
       return table.get(indexQuery)
@@ -90,7 +90,7 @@ exports.getImpl = function (indexQuery) {
   }
 }
 
-exports.onCreatingImpl = function (callback) {
+exports._onCreating = function (callback) {
   return function (table) {
     return function () {
       function listener(primaryKey, item, transaction) {
@@ -116,7 +116,7 @@ exports.onCreatingImpl = function (callback) {
   }
 }
 
-exports.onDeletingImpl = function (callback) {
+exports._onDeleting = function (callback) {
   return function (table) {
     return function () {
       function listener(primaryKey, item, transaction) {
@@ -142,7 +142,7 @@ exports.onDeletingImpl = function (callback) {
   }
 }
 
-exports.onReadingImpl = function (callback) {
+exports._onReading = function (callback) {
   return function (table) {
     return function () {
       function listener(item) {
@@ -158,7 +158,7 @@ exports.onReadingImpl = function (callback) {
   }
 }
 
-exports.onUpdatingImpl = function (callback) {
+exports._onUpdating = function (callback) {
   return function (table) {
     return function () {
       function listener(primaryKey, item, transaction) {
@@ -184,7 +184,7 @@ exports.onUpdatingImpl = function (callback) {
   }
 }
 
-exports.limitImpl = function (n) {
+exports._limit = function (n) {
   return function (table) {
     return function () {
       return table.limit(n)
@@ -192,13 +192,13 @@ exports.limitImpl = function (n) {
   }
 }
 
-exports.nameImpl = function (table) {
+exports._name = function (table) {
   return function () {
     return table.name
   }
 }
 
-exports.offsetImpl = function (n) {
+exports._offset = function (n) {
   return function (table) {
     return function () {
       return table.offset(n)
@@ -206,7 +206,7 @@ exports.offsetImpl = function (n) {
   }
 }
 
-exports.orderByImpl = function (index) {
+exports._orderBy = function (index) {
   return function (table) {
     return function () {
       return table.orderBy(index)
@@ -214,7 +214,7 @@ exports.orderByImpl = function (index) {
   }
 }
 
-exports.putImpl = function (item) {
+exports._put = function (item) {
   return function (nullableKey) {
     return function (table) {
       return function () {
@@ -224,25 +224,25 @@ exports.putImpl = function (item) {
   }
 }
 
-exports.reverseImpl = function (table) {
+exports._reverse = function (table) {
   return function () {
     return table.reverse()
   }
 }
 
-exports.toArrayImpl = function (table) {
+exports._toArray = function (table) {
   return function () {
     return table.toArray()
   }
 }
 
-exports.toCollectionImpl = function (table) {
+exports._toCollection = function (table) {
   return function () {
     return table.toCollection()
   }
 }
 
-exports.updateImpl = function (key) {
+exports._update = function (key) {
   return function (changes) {
     return function (table) {
       return function () {
@@ -252,7 +252,7 @@ exports.updateImpl = function (key) {
   }
 }
 
-exports.whereClauseImpl = function (index) {
+exports._whereClause = function (index) {
   return function (table) {
     return function () {
       return table.where(index)
@@ -260,7 +260,7 @@ exports.whereClauseImpl = function (index) {
   }
 }
 
-exports.whereValuesImpl = function (valuesObject) {
+exports._whereValues = function (valuesObject) {
   return function (table) {
     return function () {
       return table.where(valuesObject)

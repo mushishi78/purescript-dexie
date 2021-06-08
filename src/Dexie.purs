@@ -9,33 +9,33 @@ module Dexie (
 
 import Prelude
 
-import Control.Promise (Promise, toAffE)
 import Dexie.DB (DB)
+import Dexie.Promise (Promise, toAff)
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 
-foreign import newImpl :: String -> Effect DB
-foreign import deleteImpl :: String -> Effect (Promise Unit)
-foreign import getDatabaseNamesImpl :: Effect (Promise (Array String))
-foreign import existsImpl :: String -> Effect (Promise Boolean)
-foreign import getDebugImpl :: Effect (Boolean)
-foreign import setDebugImpl :: Boolean -> Effect Unit
+foreign import _new :: String -> Effect DB
+foreign import _delete :: String -> Promise Unit
+foreign import _getDatabaseNames :: Promise (Array String)
+foreign import _exists :: String -> Promise Boolean
+foreign import _getDebug :: Effect Boolean
+foreign import _setDebug :: Boolean -> Effect Unit
 
-new :: forall m. MonadEffect m => String -> m DB
-new dbName = liftEffect $ newImpl dbName
+new :: forall me. MonadEffect me => String -> me DB
+new dbName = liftEffect $ _new dbName
 
-delete :: forall m. MonadAff m => String -> m Unit
-delete dbName = liftAff $ toAffE $ deleteImpl dbName
+delete :: forall ma. MonadAff ma => String -> ma Unit
+delete dbName = liftAff $ toAff $ _delete dbName
 
-getDatabaseNames :: forall m. MonadAff m => m (Array String)
-getDatabaseNames = liftAff $ toAffE getDatabaseNamesImpl
+getDatabaseNames :: forall ma. MonadAff ma => ma (Array String)
+getDatabaseNames = liftAff $ toAff _getDatabaseNames
 
-exists :: forall m. MonadAff m => String -> m Boolean
-exists dbName = liftAff $ toAffE $ existsImpl dbName
+exists :: forall ma. MonadAff ma => String -> ma Boolean
+exists dbName = liftAff $ toAff $ _exists dbName
 
-getDebug :: forall m. MonadEffect m => m (Boolean)
-getDebug = liftEffect getDebugImpl
+getDebug :: forall me. MonadEffect me => me (Boolean)
+getDebug = liftEffect _getDebug
 
-setDebug :: forall m. MonadEffect m => Boolean -> m Unit
-setDebug isDebugging = liftEffect $ setDebugImpl isDebugging
+setDebug :: forall me. MonadEffect me => Boolean -> me Unit
+setDebug isDebugging = liftEffect $ _setDebug isDebugging

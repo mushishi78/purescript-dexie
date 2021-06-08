@@ -1,4 +1,4 @@
-exports.versionImpl = function (versionNumber) {
+exports._version = function (versionNumber) {
   return function (db) {
     return function () {
       return db.version(versionNumber)
@@ -6,7 +6,7 @@ exports.versionImpl = function (versionNumber) {
   }
 }
 
-exports.tableImpl = function (storeName) {
+exports._table = function (storeName) {
   return function (db) {
     return function () {
       return db.table(storeName)
@@ -14,7 +14,7 @@ exports.tableImpl = function (storeName) {
   }
 }
 
-exports.transactionImpl = function (db) {
+exports._transaction = function (db) {
   return function (mode) {
     return function (tables) {
       return function (callback) {
@@ -28,19 +28,19 @@ exports.transactionImpl = function (db) {
   }
 }
 
-exports.openImpl = function (db) {
+exports._open = function (db) {
   return function () {
     return db.open()
   }
 }
 
-exports.closeImpl = function (db) {
+exports._close = function (db) {
   return function () {
     return db.close()
   }
 }
 
-exports.onBlockedImpl = function (callback) {
+exports._onBlocked = function (callback) {
   return function (db) {
     return function () {
       return db.on('blocked', callback)
@@ -48,7 +48,7 @@ exports.onBlockedImpl = function (callback) {
   }
 }
 
-exports.onReadyImpl = function (callback) {
+exports._onReady = function (callback) {
   return function (db) {
     return function () {
       return db.on('ready', callback)
@@ -56,7 +56,7 @@ exports.onReadyImpl = function (callback) {
   }
 }
 
-exports.onVersionChangeImpl = function (callback) {
+exports._onVersionChange = function (callback) {
   return function (db) {
     return function () {
       return db.on('versionchange', callback)

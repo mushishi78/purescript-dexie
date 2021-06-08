@@ -5,29 +5,29 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Dexie.DB as DB
+import Dexie.Promise (toAff)
+import Dexie.Table as Table
 import Dexie.Transaction as Transaction
 import Dexie.Version as Version
-import Effect.Aff (attempt)
+import Effect.Aff (try)
 import Effect.Class (liftEffect)
 import Effect.Exception (throwException, error)
 import Foreign.Object as Object
-import Test.Helpers (withCleanDB, unsafeGet)
+import Test.Helpers (assertEqual, unsafeGet, withCleanDB)
 import Test.Unit (TestSuite, suite, test)
-import Test.Unit.Assert as Assert
 
 transactionTests :: TestSuite
-transactionTests = suite "table" do
-  test "can rollback transaction" $ withCleanDB "db" $ \db -> do
+transactionTests = suite "transaction" do
+  test "can rollback transaction" $ withCleanDB "db" $ \db -> toAff $ do
     DB.version 1 db
       >>= Version.stores (Object.singleton "foo" "id")
       # void
 
-    void $ attempt $ DB.transaction db "rw" ["foo"] \trnx -> do
+    void $ try $ DB.transaction db "rw" ["foo"] \trnx -> do
       table <- Transaction.table "foo" trnx
-      Transaction.add_ { id: 1, name: "John" } Nothing table
-      throwException (error "somethings wrong") # void
-      pure Nothing
+      Table.add_ { id: 1, name: "John" } Nothing table
+      liftEffect $ throwException (error "somethings wrong") # void
 
     table <- DB.table "foo" db
     unsafeGet 1 table
-      >>= Assert.equal (Nothing :: Maybe { id :: Int, name :: String })
+      >>= assertEqual (Nothing :: Maybe { id :: Int, name :: String })

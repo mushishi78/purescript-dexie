@@ -28,109 +28,108 @@ module Dexie.Collection (
 
 import Prelude
 
-import Control.Promise (Promise, toAffE)
+import Dexie.Promise (Promise)
 import Dexie.WhereClause (WhereClause)
 import Effect (Effect)
-import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Foreign (Foreign)
 
 foreign import data Collection :: Type
 
-foreign import andImpl :: (Foreign -> Boolean) -> Collection -> Effect Collection
-foreign import cloneImpl :: Collection -> Effect Collection
-foreign import countImpl :: Collection -> Effect (Promise Int)
-foreign import deleteImpl :: Collection -> Effect (Promise Int)
-foreign import distinctImpl :: Collection -> Effect Collection
-foreign import eachImpl :: (Foreign -> Effect Unit) -> Collection -> Effect (Promise Unit)
-foreign import eachKeyImpl :: (Foreign -> Effect Unit) -> Collection -> Effect (Promise Unit)
-foreign import eachPrimaryKeyImpl :: (Foreign -> Effect Unit) -> Collection -> Effect (Promise Unit)
-foreign import eachUniqueKeyImpl :: (Foreign -> Effect Unit) -> Collection -> Effect (Promise Unit)
-foreign import filterImpl :: (Foreign -> Boolean) -> Collection -> Effect Collection
-foreign import firstImpl :: Collection -> Effect (Promise Foreign)
-foreign import keysImpl :: Collection -> Effect (Promise (Array Foreign))
-foreign import lastImpl :: Collection -> Effect (Promise Foreign)
-foreign import limitImpl :: Collection -> Effect Collection
-foreign import modifyImpl :: Foreign -> Collection -> Effect Collection
-foreign import offsetImpl :: Collection -> Effect Collection
-foreign import orImpl :: String -> Collection -> Effect WhereClause
-foreign import primaryKeysImpl :: Collection -> Effect (Promise (Array Foreign))
-foreign import rawImpl :: Collection -> Effect Collection
-foreign import reverseImpl :: Collection -> Effect Collection
-foreign import sortByImpl :: String -> Collection -> Effect (Promise (Array Foreign))
-foreign import toArrayImpl :: Collection -> Effect (Promise (Array Foreign))
-foreign import uniqueKeysImpl :: Collection -> Effect (Promise (Array Foreign))
-foreign import untilImpl :: (Foreign -> Boolean) -> Boolean -> Collection -> Effect Collection
+foreign import _and :: (Foreign -> Boolean) -> Collection -> Effect Collection
+foreign import _clone :: Collection -> Effect Collection
+foreign import _count :: Collection -> Promise Int
+foreign import _delete :: Collection -> Promise Int
+foreign import _distinct :: Collection -> Effect Collection
+foreign import _each :: (Foreign -> Effect Unit) -> Collection -> Promise Unit
+foreign import _eachKey :: (Foreign -> Effect Unit) -> Collection -> Promise Unit
+foreign import _eachPrimaryKey :: (Foreign -> Effect Unit) -> Collection -> Promise Unit
+foreign import _eachUniqueKey :: (Foreign -> Effect Unit) -> Collection -> Promise Unit
+foreign import _filter :: (Foreign -> Boolean) -> Collection -> Effect Collection
+foreign import _first :: Collection -> Promise Foreign
+foreign import _keys :: Collection -> Promise (Array Foreign)
+foreign import _last :: Collection -> Promise Foreign
+foreign import _limit :: Collection -> Effect Collection
+foreign import _modify :: Foreign -> Collection -> Effect Collection
+foreign import _offset :: Collection -> Effect Collection
+foreign import _or :: String -> Collection -> Effect WhereClause
+foreign import _primaryKeys :: Collection -> Promise (Array Foreign)
+foreign import _raw :: Collection -> Effect Collection
+foreign import _reverse :: Collection -> Effect Collection
+foreign import _sortBy :: String -> Collection -> Promise (Array Foreign)
+foreign import _toArray :: Collection -> Promise (Array Foreign)
+foreign import _uniqueKeys :: Collection -> Promise (Array Foreign)
+foreign import _until :: (Foreign -> Boolean) -> Boolean -> Collection -> Effect Collection
 
 and :: forall me. MonadEffect me => (Foreign -> Boolean) -> Collection -> me Collection
-and filterFn collection = liftEffect $ andImpl filterFn collection
+and filterFn collection = liftEffect $ _and filterFn collection
 
 clone :: forall me. MonadEffect me => Collection -> me Collection
-clone collection = liftEffect $ cloneImpl collection
+clone collection = liftEffect $ _clone collection
 
-count :: forall ma. MonadAff ma => Collection -> ma Int
-count collection = liftAff $ toAffE $ countImpl collection
+count :: Collection -> Promise Int
+count collection = _count collection
 
-delete :: forall ma. MonadAff ma => Collection -> ma Int
-delete collection = liftAff $ toAffE $ deleteImpl collection
+delete :: Collection -> Promise Int
+delete collection = _delete collection
 
 distinct :: forall me. MonadEffect me => Collection -> me Collection
-distinct collection = liftEffect $ distinctImpl collection
+distinct collection = liftEffect $ _distinct collection
 
-each :: forall ma. MonadAff ma => (Foreign -> Effect Unit) -> Collection -> ma Unit
-each onEach collection = liftAff $ toAffE $ eachImpl onEach collection
+each :: (Foreign -> Effect Unit) -> Collection -> Promise Unit
+each onEach collection = _each onEach collection
 
-eachKey :: forall ma. MonadAff ma => (Foreign -> Effect Unit) -> Collection -> ma Unit
-eachKey onEach collection = liftAff $ toAffE $ eachKeyImpl onEach collection
+eachKey :: (Foreign -> Effect Unit) -> Collection -> Promise Unit
+eachKey onEach collection = _eachKey onEach collection
 
-eachPrimaryKey :: forall ma. MonadAff ma => (Foreign -> Effect Unit) -> Collection -> ma Unit
-eachPrimaryKey onEach collection = liftAff $ toAffE $ eachPrimaryKeyImpl onEach collection
+eachPrimaryKey :: (Foreign -> Effect Unit) -> Collection -> Promise Unit
+eachPrimaryKey onEach collection = _eachPrimaryKey onEach collection
 
-eachUniqueKey :: forall ma. MonadAff ma => (Foreign -> Effect Unit) -> Collection -> ma Unit
-eachUniqueKey onEach collection = liftAff $ toAffE $ eachUniqueKeyImpl onEach collection
+eachUniqueKey :: (Foreign -> Effect Unit) -> Collection -> Promise Unit
+eachUniqueKey onEach collection = _eachUniqueKey onEach collection
 
 filter :: forall me. MonadEffect me => (Foreign -> Boolean) -> Collection -> me Collection
-filter filterFn collection = liftEffect $ filterImpl filterFn collection
+filter filterFn collection = liftEffect $ _filter filterFn collection
 
-first :: forall ma. MonadAff ma => Collection -> ma Foreign
-first collection = liftAff $ toAffE $ firstImpl collection
+first :: Collection -> Promise Foreign
+first collection = _first collection
 
-keys :: forall ma. MonadAff ma => Collection -> ma (Array Foreign)
-keys collection = liftAff $ toAffE $ keysImpl collection
+keys :: Collection -> Promise (Array Foreign)
+keys collection = _keys collection
 
-last :: forall ma. MonadAff ma => Collection -> ma Foreign
-last collection = liftAff $ toAffE $ lastImpl collection
+last :: Collection -> Promise Foreign
+last collection = _last collection
 
 limit :: forall me. MonadEffect me => Collection -> me Collection
-limit collection = liftEffect $ limitImpl collection
+limit collection = liftEffect $ _limit collection
 
 modify :: forall me. MonadEffect me => Foreign -> Collection -> me Collection
-modify fnOrObject collection = liftEffect $ modifyImpl fnOrObject collection
+modify fnOrObject collection = liftEffect $ _modify fnOrObject collection
 
 offset :: forall me. MonadEffect me => Collection -> me Collection
-offset collection = liftEffect $ offsetImpl collection
+offset collection = liftEffect $ _offset collection
 
 or :: forall me. MonadEffect me => String -> Collection -> me WhereClause
-or index collection = liftEffect $ orImpl index collection
+or index collection = liftEffect $ _or index collection
 
-primaryKeys :: forall ma. MonadAff ma => Collection -> ma (Array Foreign)
-primaryKeys collection = liftAff $ toAffE $ primaryKeysImpl collection
+primaryKeys :: Collection -> Promise (Array Foreign)
+primaryKeys collection = _primaryKeys collection
 
 raw :: forall me. MonadEffect me => Collection -> me Collection
-raw collection = liftEffect $ rawImpl collection
+raw collection = liftEffect $ _raw collection
 
 reverse :: forall me. MonadEffect me => Collection -> me Collection
-reverse collection = liftEffect $ reverseImpl collection
+reverse collection = liftEffect $ _reverse collection
 
-sortBy :: forall ma. MonadAff ma => String -> Collection -> ma (Array Foreign)
-sortBy index collection = liftAff $ toAffE $ sortByImpl index collection
+sortBy :: String -> Collection -> Promise (Array Foreign)
+sortBy index collection = _sortBy index collection
 
-toArray :: forall ma. MonadAff ma => Collection -> ma (Array Foreign)
-toArray collection = liftAff $ toAffE $ toArrayImpl collection
+toArray :: Collection -> Promise (Array Foreign)
+toArray collection = _toArray collection
 
-uniqueKeys :: forall ma. MonadAff ma => Collection -> ma (Array Foreign)
-uniqueKeys collection = liftAff $ toAffE $ uniqueKeysImpl collection
+uniqueKeys :: Collection -> Promise (Array Foreign)
+uniqueKeys collection = _uniqueKeys collection
 
 until :: forall me. MonadEffect me => (Foreign -> Boolean) -> Boolean -> Collection -> me Collection
-until filterFn includeStopEntry collection = liftEffect $ untilImpl filterFn includeStopEntry collection
+until filterFn includeStopEntry collection = liftEffect $ _until filterFn includeStopEntry collection
 
