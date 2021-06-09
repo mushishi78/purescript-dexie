@@ -12,7 +12,7 @@ import Effect.Aff (try)
 import Effect.Class (liftEffect)
 import Effect.Exception (throwException, error)
 import Foreign.Object as Object
-import Test.Helpers (assert, assertEqual, delay, withCleanDB)
+import Test.Helpers (assert, assertEqual, unsafeDelay, withCleanDB)
 import Test.Unit (TestSuite, suite, test)
 
 transactionTests :: TestSuite
@@ -41,7 +41,7 @@ transactionTests = suite "transaction" do
     p <- Promise.launch $ do
       Table.add_ "One" Nothing foo
       Table.add_ "Two" Nothing foo
-      delay 1.0
+      unsafeDelay 1.0
       Table.add_ "Three" Nothing foo
       Table.add_ "Four" Nothing foo
 
@@ -74,5 +74,5 @@ transactionTests = suite "transaction" do
     assertEqual 0 =<< Table.count =<< DB.table "foo" db
 
     -- Check that you can't read from foo until the whole transaction has committed
-    delay 1.0
+    unsafeDelay 1.0
     assertEqual 4 =<< Table.count =<< DB.table "foo" db

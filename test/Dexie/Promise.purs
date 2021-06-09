@@ -8,7 +8,7 @@ import Dexie.Promise as Promise
 import Effect.Class (liftEffect)
 import Effect.Exception (error)
 import Effect.Ref as Ref
-import Test.Helpers (assertEqual, delay)
+import Test.Helpers (assertEqual, unsafeDelay)
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 
@@ -38,7 +38,7 @@ promiseTests = suite "promise" do
     ref <- liftEffect $ Ref.new 0
 
     -- After 1ms modify ref to be 1
-    p <- Promise.launch $ delay 1.0 *> (liftEffect (Ref.write 1 ref))
+    p <- Promise.launch $ unsafeDelay 1.0 *> (liftEffect (Ref.write 1 ref))
 
     -- Check that it's still 0
     assertEqual 0 =<< liftEffect (Ref.read ref)

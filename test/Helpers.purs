@@ -41,5 +41,5 @@ assert reason b = unsafeUseAff $ Assert.assert reason b
 assertEqual :: forall a. Eq a => Show a => a -> a -> Promise Unit
 assertEqual a b = unsafeUseAff $ Assert.equal a b
 
-delay :: Number -> Promise Unit
-delay milliseconds = unsafeUseAff $ Aff.delay (Milliseconds milliseconds)
+unsafeDelay :: Number -> Promise Unit
+unsafeDelay milliseconds = unsafeUseAff $ Aff.delay (Milliseconds milliseconds)
