@@ -1,7 +1,9 @@
 module Dexie.Version (
     Version,
     stores,
-    upgrade
+    stores_,
+    upgrade,
+    upgrade_
 ) where
 
 import Prelude
@@ -20,5 +22,11 @@ foreign import _upgrade :: (Transaction -> Promise Unit) -> Version -> Effect Ve
 stores :: forall m. MonadEffect m => Object String -> Version -> m Version
 stores schemaDefinition versionInstance = liftEffect $ _stores schemaDefinition versionInstance
 
+stores_ :: forall m. MonadEffect m => Object String -> Version -> m Unit
+stores_ schemaDefinition versionInstance = void $ stores schemaDefinition versionInstance
+
 upgrade :: forall m. MonadEffect m => (Transaction -> Promise Unit) -> Version -> m Version
 upgrade onUpgrade versionInstance = liftEffect $ _upgrade onUpgrade versionInstance
+
+upgrade_ :: forall m. MonadEffect m => (Transaction -> Promise Unit) -> Version -> m Unit
+upgrade_ onUpgrade versionInstance = void $ upgrade onUpgrade versionInstance

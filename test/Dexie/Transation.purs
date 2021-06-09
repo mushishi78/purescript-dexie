@@ -18,9 +18,7 @@ import Test.Unit (TestSuite, suite, test)
 transactionTests :: TestSuite
 transactionTests = suite "transaction" do
   test "can rollback transaction" $ withCleanDB "db" $ \db -> Promise.toAff $ do
-    DB.version 1 db
-      >>= Version.stores (Object.singleton "foo" "id")
-      # void
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
 
     void $ try $ DB.transaction db "rw" ["foo"] \trnx -> do
       table <- Transaction.table "foo" trnx
@@ -30,9 +28,7 @@ transactionTests = suite "transaction" do
     assertEqual 0 =<< Table.count =<< DB.table "foo" db
 
   test "can make concurrent writes if promises not awaited" $ withCleanDB "db" $ \db -> Promise.toAff $ do
-    DB.version 1 db
-      >>= Version.stores (Object.singleton "foo" "++" # Object.insert "bar" "++")
-      # void
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++" # Object.insert "bar" "++")
 
     foo <- DB.table "foo" db
     bar <- DB.table "bar" db
@@ -58,9 +54,7 @@ transactionTests = suite "transaction" do
     assertEqual 4 =<< Table.count foo
 
   test "cannot make concurrent read if in a transaction" $ withCleanDB "db" $ \db -> Promise.toAff $ do
-    DB.version 1 db
-      >>= Version.stores (Object.singleton "foo" "++")
-      # void
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
 
     -- Start writing to foo in transaction but don't wait
     void $ Promise.launch $ DB.transaction db "rw" ["foo"] \trnx -> do
