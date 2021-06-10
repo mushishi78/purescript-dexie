@@ -13,6 +13,7 @@
   , "prelude"
   , "psci-support"
   , "refs"
+  , "stringutils"
   , "test-unit"
   , "transformers"
   ]

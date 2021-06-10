@@ -3,6 +3,8 @@ module Test.Dexie.Table where
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import Data.String.Utils (startsWith)
+import Dexie.Collection as Collection
 import Dexie.DB as DB
 import Dexie.Promise (Promise, toAff)
 import Dexie.Table (Table)
@@ -162,3 +164,17 @@ tableTests = suiteOnly "table" do
 
     -- Check it equals what we'd expect
     assertEqual "JohnHarryJane" =<< liftEffect (Ref.read ref)
+
+  test "can filter" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+
+    values <- Table.filter (\item -> startsWith "J" (unsafeFromForeign item)) foo >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["John", "Jane"] $ map unsafeFromForeign values
+
+
