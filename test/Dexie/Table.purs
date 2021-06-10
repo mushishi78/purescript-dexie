@@ -70,9 +70,48 @@ tableTests = suiteOnly "table" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    -- Add one row
+    -- Add multiple rows
     keys <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
 
     -- Check it equals what we'd expect
     assertEqual [1, 2, 3] (map unsafeFromForeign keys)
     assertEqual ["John", "Harry", "Jane"] =<< unsafeToArray foo
+
+  test "can bulkDelete" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+
+    -- And delete some of them
+    Table.bulkDelete [1, 3] foo
+
+    -- Check it equals what we'd expect
+    assertEqual ["Harry"] =<< unsafeToArray foo
+
+  test "can bulkGet" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+
+    -- And read specific ones
+    values <- Table.bulkGet [1, 3, 25] foo
+
+    -- Check it equals what we'd expect
+    assertEqual [Just "John", Just "Jane", Nothing] $ map (map unsafeFromForeign) values
+
+  test "can bulkPut" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+
+    -- And put specific ones
+    _ <- Table.bulkPut ["Lizzie", "Chelsea", "Eve"] (Just [1, 3, 25]) foo
+
+    -- Check it equals what we'd expect
+    assertEqual ["Lizzie", "Harry", "Chelsea", "Eve"] =<< unsafeToArray foo
