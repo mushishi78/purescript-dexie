@@ -4,15 +4,21 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Dexie.DB as DB
-import Dexie.Promise (toAff)
+import Dexie.Promise (Promise, toAff)
+import Dexie.Table (Table)
 import Dexie.Table as Table
 import Dexie.Version as Version
+import Foreign (unsafeFromForeign)
 import Foreign.Object as Object
-import Test.Helpers (assertEqual, cleanUp, unsafeGet, withDB)
+import Test.Helpers (assertEqual, cleanUp, withDB)
 import Test.Unit (TestSuite, suite, test)
 
 versionTests :: TestSuite
 versionTests = suite "version" do
+  let
+    unsafeGet :: forall key item. key -> Table -> Promise (Maybe item)
+    unsafeGet key table = Table.get key table # map (map unsafeFromForeign)
+
   test "can make an upgrade migration" do
     cleanUp
 

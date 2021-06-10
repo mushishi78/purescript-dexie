@@ -10,11 +10,8 @@ import Dexie.DB (DB)
 import Dexie.DB as DB
 import Dexie.Promise (Promise)
 import Dexie.Promise as Promise
-import Dexie.Table (Table)
-import Dexie.Table as Table
 import Effect.Aff (Aff, Milliseconds(..), bracket, runAff_)
 import Effect.Aff as Aff
-import Foreign (unsafeFromForeign)
 import Test.Unit (Test)
 import Test.Unit.Assert as Assert
 
@@ -26,9 +23,6 @@ withCleanDB dbName fn = cleanUp *> withDB dbName fn
 
 withDB :: String -> (DB -> Test) -> Test
 withDB dbName = bracket (Dexie.new dbName) DB.close
-
-unsafeGet :: forall key item. key -> Table -> Promise (Maybe item)
-unsafeGet key table = Table.get key table # map (map unsafeFromForeign)
 
 unsafeUseAff :: forall a. Aff a -> Promise a
 unsafeUseAff aff = Promise.new $ \resolve reject -> (flip $ runAff_) aff $ case _ of
