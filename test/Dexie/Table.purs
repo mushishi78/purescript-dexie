@@ -8,6 +8,8 @@ import Dexie.Promise (Promise, toAff)
 import Dexie.Table (Table)
 import Dexie.Table as Table
 import Dexie.Version as Version
+import Effect.Class (liftEffect)
+import Effect.Ref as Ref
 import Foreign (unsafeFromForeign)
 import Foreign.Object as Object
 import Test.Helpers (withCleanDB, assertEqual)
@@ -115,3 +117,48 @@ tableTests = suiteOnly "table" do
 
     -- Check it equals what we'd expect
     assertEqual ["Lizzie", "Harry", "Chelsea", "Eve"] =<< unsafeToArray foo
+
+  test "can clear" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+
+    -- Check that they're there
+    assertEqual 3 =<< Table.count foo
+
+    -- And the delete them all
+    Table.clear foo
+
+    -- Check that they've gone
+    assertEqual 0 =<< Table.count foo
+
+  test "can delete" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+
+    -- And delete some of them
+    Table.delete 1 foo
+
+    -- Check it equals what we'd expect
+    assertEqual ["Harry", "Jane"] =<< unsafeToArray foo
+
+  test "can each" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new ""
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+
+    -- And iterate over them
+    (flip Table.each) foo $ \item -> do
+      -- Concatenate the items together in the ref
+      liftEffect $ (flip Ref.modify_) ref $ \s -> s <> unsafeFromForeign item
+
+    -- Check it equals what we'd expect
+    assertEqual "JohnHarryJane" =<< liftEffect (Ref.read ref)
