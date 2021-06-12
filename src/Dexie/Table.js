@@ -102,15 +102,21 @@ exports._onCreating = function (callback) {
           setOnSuccess: function (onSuccess) {
             return function () {
               self.onsuccess = function (primaryKey) {
-                return onSuccess(primaryKey)()
+                try {
+                  return onSuccess(primaryKey)()
+                } catch (error) {
+                  console.error(error)
+                }
               }
             }
           },
           setOnError: function (onError) {
             return function () {
               self.onerror = function (error) {
-                return function () {
+                try {
                   return onError(error)()
+                } catch (error) {
+                  console.error(error)
                 }
               }
             }
@@ -138,12 +144,24 @@ exports._onDeleting = function (callback) {
           transaction,
           setOnSuccess: function (onSuccess) {
             return function () {
-              self.onsuccess = onSuccess
+              self.onsuccess = function () {
+                try {
+                  return onSuccess()
+                } catch (error) {
+                  console.error(error)
+                }
+              }
             }
           },
           setOnError: function (onError) {
             return function () {
-              self.onerror = onError
+              self.onerror = function (error) {
+                try {
+                  return onError(error)()
+                } catch (error) {
+                  console.error(error)
+                }
+              }
             }
           },
         })()
@@ -185,12 +203,24 @@ exports._onUpdating = function (callback) {
           transaction,
           setOnSuccess: function (onSuccess) {
             return function () {
-              self.onsuccess = onSuccess
+              self.onsuccess = function () {
+                try {
+                  return onSuccess()
+                } catch (error) {
+                  console.error(error)
+                }
+              }
             }
           },
           setOnError: function (onError) {
             return function () {
-              self.onerror = onError
+              self.onerror = function (error) {
+                try {
+                  return onError(error)()
+                } catch (error) {
+                  console.error(error)
+                }
+              }
             }
           },
         })()

@@ -2,6 +2,7 @@ module Test.Dexie.Table where
 
 import Prelude
 
+import Control.Monad.Error.Class (try)
 import Data.Maybe (Maybe(..))
 import Data.String.Utils (startsWith)
 import Dexie.Collection as Collection
@@ -11,14 +12,16 @@ import Dexie.Table (Table)
 import Dexie.Table as Table
 import Dexie.Version as Version
 import Effect.Class (liftEffect)
+import Effect.Exception (error)
+import Effect.Exception as Error
 import Effect.Ref as Ref
 import Foreign (unsafeFromForeign)
 import Foreign.Object as Object
 import Test.Helpers (withCleanDB, assertEqual)
-import Test.Unit (TestSuite, suiteOnly, test)
+import Test.Unit (TestSuite, suite, test)
 
 tableTests :: TestSuite
-tableTests = suiteOnly "table" do
+tableTests = suite "table" do
   let
     unsafeGet :: forall key item. key -> Table -> Promise (Maybe item)
     unsafeGet key table = Table.get key table # map (map unsafeFromForeign)
@@ -233,3 +236,27 @@ tableTests = suiteOnly "table" do
 
     -- Check that the ref is now 1
     assertEqual 1 =<< liftEffect (Ref.read ref)
+
+  test "can set onCreating's onError" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new (error "Noop")
+
+    -- Make the callback set the onError
+    void $ (flip Table.onCreating) foo $ \args -> do
+
+      -- Make the onError set the ref
+      args.setOnError $ \err -> do
+        Ref.write err ref
+
+      pure Nothing
+
+    -- Check that the ref is currently original error
+    assertEqual "Noop" =<< map Error.message (liftEffect (Ref.read ref))
+
+    -- Try to add to the same row twice causing an error
+    Table.add_ "John" (Just 1) foo
+    void $ try $ Table.add_ "Mike" (Just 1) foo
+
+    -- Check that the ref is new error
+    assertEqual "Key already exists in the object store." =<< map Error.message (liftEffect (Ref.read ref))

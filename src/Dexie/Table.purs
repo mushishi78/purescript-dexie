@@ -41,6 +41,7 @@ import Dexie.Promise (Promise)
 import Dexie.WhereClause (WhereClause)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Exception (Error)
 import Foreign (Foreign, unsafeToForeign)
 
 type OnCreatingArgs =
@@ -48,7 +49,7 @@ type OnCreatingArgs =
     , item :: Foreign
     , transaction :: Transaction
     , setOnSuccess :: (Foreign -> Effect Unit) -> Effect Unit
-    , setOnError :: Effect Unit -> Effect Unit
+    , setOnError :: (Error -> Effect Unit) -> Effect Unit
     }
 
 type OnDeletingArgs =
@@ -56,7 +57,7 @@ type OnDeletingArgs =
     , item :: Foreign
     , transaction :: Transaction
     , setOnSuccess :: Effect Unit -> Effect Unit
-    , setOnError :: Effect Unit -> Effect Unit
+    , setOnError :: (Error -> Effect Unit)-> Effect Unit
     }
 
 type OnUpdatingArgs =
@@ -64,7 +65,7 @@ type OnUpdatingArgs =
     , item :: Foreign
     , transaction :: Transaction
     , setOnSuccess :: Effect Unit -> Effect Unit
-    , setOnError :: Effect Unit -> Effect Unit
+    , setOnError :: (Error -> Effect Unit) -> Effect Unit
     }
 
 foreign import _add :: Foreign -> Nullable Foreign -> Table -> Promise Foreign
