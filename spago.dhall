@@ -1,6 +1,7 @@
 { name = "dexie"
 , dependencies =
   [ "aff"
+  , "bifunctors"
   , "control"
   , "effect"
   , "either"

@@ -3,6 +3,8 @@ module Test.Dexie.Table where
 import Prelude
 
 import Control.Monad.Error.Class (try)
+import Data.Bifunctor (lmap)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.String.Utils (startsWith)
 import Dexie.Collection as Collection
@@ -12,7 +14,7 @@ import Dexie.Table (Table)
 import Dexie.Table as Table
 import Dexie.Version as Version
 import Effect.Class (liftEffect)
-import Effect.Exception (error)
+import Effect.Exception (error, throwException)
 import Effect.Exception as Error
 import Effect.Ref as Ref
 import Foreign (unsafeFromForeign)
@@ -260,3 +262,17 @@ tableTests = suite "table" do
 
     -- Check that the ref is new error
     assertEqual "Key already exists in the object store." =<< map Error.message (liftEffect (Ref.read ref))
+
+  test "can fail an add by throwing in onCreating" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Make the callback throw an error
+    void $ (flip Table.onCreating) foo $ \_ -> do
+      throwException (error "dont like this")
+
+    -- Try to add to a row
+    maybeError <- try $ Table.add_ "John" Nothing foo
+
+    -- Check that the result of the add is an error
+    assertEqual (Left "dont like this") $ lmap Error.message maybeError
