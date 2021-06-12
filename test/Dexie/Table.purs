@@ -277,6 +277,32 @@ tableTests = suite "table" do
     -- Check that the result of the add is an error
     assertEqual (Left "dont like this") $ lmap Error.message maybeError
 
+  test "can unsubscribe from onCreating" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new 0
+
+    -- Make the callback increment the ref
+    unsubscribe <- (flip Table.onCreating) foo $ \_ -> do
+      liftEffect $ Ref.modify_ (_ + 1) ref
+      pure Nothing
+
+    -- Increment the counter a few times
+    Table.add_ "John" Nothing foo
+    Table.add_ "Sara" Nothing foo
+    Table.add_ "Pauline" Nothing foo
+
+    -- Unsubscribe the callback
+    liftEffect $ unsubscribe
+
+    -- Add a few times to show it's no longer counting
+    Table.add_ "Harriet" Nothing foo
+    Table.add_ "Jessica" Nothing foo
+    Table.add_ "Eve" Nothing foo
+
+    -- Check that the counter is what we expect
+    assertEqual 3 =<< liftEffect (Ref.read ref)
+
   test "can set onDeleting callback" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
