@@ -276,3 +276,75 @@ tableTests = suite "table" do
 
     -- Check that the result of the add is an error
     assertEqual (Left "dont like this") $ lmap Error.message maybeError
+
+  test "can set onDeleting callback" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new false
+
+    -- Make the callback set the ref to true
+    void $ (flip Table.onDeleting) foo $ \_ -> do
+      Ref.write true ref
+
+    -- Add a row to the table
+    Table.add_ "John" Nothing foo
+
+    -- Check that the ref is currently false
+    assertEqual false =<< liftEffect (Ref.read ref)
+
+    -- Now delete the row causing the callback to be called
+    Table.delete 1 foo
+
+    -- Check that the ref is now true
+    assertEqual true =<< liftEffect (Ref.read ref)
+
+  test "can fail a delete by throwing in onDeleting" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Make the callback throw an error
+    void $ (flip Table.onDeleting) foo $ \_ -> do
+      throwException (error "dont like this")
+
+    -- Try to add to a row
+    Table.add_ "John" Nothing foo
+    maybeError <- try $ Table.delete  1 foo
+
+    -- Check that the result of the add is an error
+    assertEqual (Left "dont like this") $ lmap Error.message maybeError
+
+  test "can get value from onReading" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new ""
+
+    -- Make the callback set the ref to the row value
+    void $ (flip Table.onReading) foo $ \value -> do
+      Ref.write (unsafeFromForeign value) ref
+      pure value
+
+    -- Add a row to the table
+    Table.add_ "John" Nothing foo
+
+    -- Check that the ref is currently empty
+    assertEqual "" =<< liftEffect (Ref.read ref)
+
+    -- Call get to trigger the callback
+    _ <- Table.get 1 foo
+
+    -- Check that the ref is now "John"
+    assertEqual "John" =<< liftEffect (Ref.read ref)
+
+  test "can modify value with onReading" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Make the callback set the ref to the row value
+    void $ (flip Table.onReading) foo $ \value -> do
+      pure ("Sir " <> unsafeFromForeign value)
+
+    -- Add a row to the table
+    Table.add_ "John" Nothing foo
+
+    -- Check that get now prefixes the value
+    assertEqual (Just "Sir John") =<< unsafeGet 1 foo
