@@ -348,3 +348,69 @@ tableTests = suite "table" do
 
     -- Check that get now prefixes the value
     assertEqual (Just "Sir John") =<< unsafeGet 1 foo
+
+  test "can set onUpdating callback" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new false
+
+    -- Make the callback set the ref to true
+    void $ (flip Table.onUpdating) foo $ \_ -> do
+      Ref.write true ref
+      pure Nothing
+
+    -- Add a row to the table
+    Table.add_ "John" Nothing foo
+
+    -- Check that the ref is currently false
+    assertEqual false =<< liftEffect (Ref.read ref)
+
+    -- Update the row, causing the callback to be called
+    Table.put_ "Harry" (Just 1) foo
+
+    -- Check that the ref is now true
+    assertEqual true =<< liftEffect (Ref.read ref)
+
+  test "can modify the modifications with onUpdating" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Make the callback modify ther modifications
+    void $ (flip Table.onUpdating) foo $ \args -> do
+      let { name } = unsafeFromForeign args.modifications
+      pure $ Just $ { name, title: "Prince" }
+
+    -- Add a row to the table
+    Table.add_ { name: "John" } Nothing foo
+
+    -- Update the row, causing the callback to be called
+    Table.update_ 1 { name: "Harry" } foo
+
+    -- Check that the row has the modified value
+    assertEqual (Just { name: "Harry", title: "Prince" }) =<< unsafeGet 1 foo
+
+  test "can get the updated item with onUpdating's onSuccess" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new { name: "", title: "" }
+
+    -- Make the callback set the onSuccess
+    void $ (flip Table.onUpdating) foo $ \args -> do
+
+      -- Make the onSuccess set the ref
+      args.setOnSuccess $ \updatedItem -> do
+        Ref.write (unsafeFromForeign updatedItem) ref
+
+      pure Nothing
+
+    -- Add a row to the table
+    Table.add_ { name: "John" } Nothing foo
+
+    -- Check that the ref is currently empty
+    assertEqual { name: "", title: "" } =<< liftEffect (Ref.read ref)
+
+    -- Update the row, causing the callback to be called
+    Table.update_ 1 { title: "Sir" } foo
+
+    -- Check that the ref is now updated
+    assertEqual { name: "John", title: "Sir" } =<< liftEffect (Ref.read ref)

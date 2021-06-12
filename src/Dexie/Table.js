@@ -195,17 +195,18 @@ exports._onReading = function (callback) {
 exports._onUpdating = function (callback) {
   return function (table) {
     return function () {
-      function listener(primaryKey, item, transaction) {
+      function listener(modifications, primaryKey, item, transaction) {
         var self = this
         return callback({
+          modifications,
           primaryKey,
           item,
           transaction,
           setOnSuccess: function (onSuccess) {
             return function () {
-              self.onsuccess = function () {
+              self.onsuccess = function (updatedItem) {
                 try {
-                  return onSuccess()
+                  return onSuccess(updatedItem)()
                 } catch (error) {
                   console.error(error)
                 }

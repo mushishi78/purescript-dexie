@@ -26,7 +26,9 @@ module Dexie.Table (
     update,
     whereClause,
     whereValues,
-    add_
+    add_,
+    put_,
+    update_
 ) where
 
 import Prelude
@@ -61,10 +63,11 @@ type OnDeletingArgs =
     }
 
 type OnUpdatingArgs =
-    { primaryKey :: Foreign
+    { modifications :: Foreign
+    , primaryKey :: Foreign
     , item :: Foreign
     , transaction :: Transaction
-    , setOnSuccess :: Effect Unit -> Effect Unit
+    , setOnSuccess :: (Foreign -> Effect Unit) -> Effect Unit
     , setOnError :: (Error -> Effect Unit) -> Effect Unit
     }
 
@@ -197,4 +200,10 @@ whereValues values = liftEffect $ _whereValues (unsafeToForeign values)
 -- Helpers
 
 add_ :: forall a b. a -> Maybe b -> Table -> Promise Unit
-add_ item maybeKey table = add item maybeKey table # void
+add_ item maybeKey table = void $ add item maybeKey table
+
+put_ :: forall item key. item -> Maybe key -> Table -> Promise Unit
+put_ item maybeKey table = void $ put item maybeKey table
+
+update_ :: forall key changes. key -> changes -> Table -> Promise Unit
+update_ key changes table = void $ update key changes table
