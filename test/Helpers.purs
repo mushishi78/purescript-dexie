@@ -4,7 +4,6 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)
-import Data.Maybe (Maybe)
 import Dexie as Dexie
 import Dexie.DB (DB)
 import Dexie.DB as DB

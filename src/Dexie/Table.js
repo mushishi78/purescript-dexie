@@ -94,15 +94,26 @@ exports._onCreating = function (callback) {
   return function (table) {
     return function () {
       function listener(primaryKey, item, transaction) {
+        var self = this
         return callback({
           primaryKey,
           item,
           transaction,
           setOnSuccess: function (onSuccess) {
-            this.onsuccess = onSuccess
+            return function () {
+              self.onsuccess = function (primaryKey) {
+                return onSuccess(primaryKey)()
+              }
+            }
           },
           setOnError: function (onError) {
-            this.onerror = onError
+            return function () {
+              self.onerror = function (error) {
+                return function () {
+                  return onError(error)()
+                }
+              }
+            }
           },
         })()
       }
@@ -120,15 +131,20 @@ exports._onDeleting = function (callback) {
   return function (table) {
     return function () {
       function listener(primaryKey, item, transaction) {
+        var self = this
         callback({
           primaryKey,
           item,
           transaction,
           setOnSuccess: function (onSuccess) {
-            this.onsuccess = onSuccess
+            return function () {
+              self.onsuccess = onSuccess
+            }
           },
           setOnError: function (onError) {
-            this.onerror = onError
+            return function () {
+              self.onerror = onError
+            }
           },
         })()
       }
@@ -162,15 +178,20 @@ exports._onUpdating = function (callback) {
   return function (table) {
     return function () {
       function listener(primaryKey, item, transaction) {
+        var self = this
         return callback({
           primaryKey,
           item,
           transaction,
           setOnSuccess: function (onSuccess) {
-            this.onsuccess = onSuccess
+            return function () {
+              self.onsuccess = onSuccess
+            }
           },
           setOnError: function (onError) {
-            this.onerror = onError
+            return function () {
+              self.onerror = onError
+            }
           },
         })()
       }

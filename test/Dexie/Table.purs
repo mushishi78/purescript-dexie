@@ -172,9 +172,64 @@ tableTests = suiteOnly "table" do
     -- Add multiple rows
     _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
 
+    -- Filter the table with a predicate
     values <- Table.filter (\item -> startsWith "J" (unsafeFromForeign item)) foo >>= Collection.toArray
 
     -- Check it equals what we'd expect
     assertEqual ["John", "Jane"] $ map unsafeFromForeign values
 
+  test "can set onCreating callback" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new false
 
+    -- Make the callback set the ref to true
+    void $ (flip Table.onCreating) foo $ \_ -> do
+      Ref.write true ref
+      pure Nothing
+
+    -- Check that the ref is currently false
+    assertEqual false =<< liftEffect (Ref.read ref)
+
+    -- Add to the table, causing the callback to be called
+    Table.add_ "John" Nothing foo
+
+    -- Check that the ref is now true
+    assertEqual true =<< liftEffect (Ref.read ref)
+
+  test "can make primary key with onCreating" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "")
+    foo <- DB.table "foo" db
+
+    -- Make the callback return a primary key for the row
+    void $ (flip Table.onCreating) foo $ \_ -> do
+      pure (Just "key")
+
+    -- Add to the table, causing the callback to be called
+    Table.add_ "John" Nothing foo
+
+    -- Check that the row has the new key
+    assertEqual (Just "John") =<< unsafeGet "key" foo
+
+  test "can get the primary key with onCreating's onSuccess" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new 28
+
+    -- Make the callback set the onSuccess
+    void $ (flip Table.onCreating) foo $ \args -> do
+
+      -- Make the onSuccess set the ref
+      args.setOnSuccess $ \primaryKey -> do
+        Ref.write (unsafeFromForeign primaryKey) ref
+
+      pure Nothing
+
+    -- Check that the ref is currently 28
+    assertEqual 28 =<< liftEffect (Ref.read ref)
+
+    -- Add to the table, causing the callback to be called
+    Table.add_ "John" Nothing foo
+
+    -- Check that the ref is now 1
+    assertEqual 1 =<< liftEffect (Ref.read ref)
