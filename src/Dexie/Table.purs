@@ -95,8 +95,8 @@ foreign import _reverse :: Table -> Effect Collection
 foreign import _toArray :: Table -> Promise (Array Foreign)
 foreign import _toCollection :: Table -> Effect Collection
 foreign import _update :: Foreign -> Foreign -> Table -> Promise Int
-foreign import _whereClause :: Foreign -> Effect WhereClause
-foreign import _whereValues :: Foreign -> Effect Collection
+foreign import _whereClause :: Foreign -> Table -> Effect WhereClause
+foreign import _whereValues :: Foreign -> Table -> Effect Collection
 
 add :: forall item key. item -> Maybe key -> Table -> Promise Foreign
 add item maybeKey table = _add foreignItem foreignKey table
@@ -191,11 +191,11 @@ toCollection table = liftEffect $ _toCollection table
 update :: forall key changes. key -> changes -> Table -> Promise Int
 update key changes table = _update (unsafeToForeign key) (unsafeToForeign changes) table
 
-whereClause :: forall me key. MonadEffect me => key -> me WhereClause
-whereClause key = liftEffect $ _whereClause (unsafeToForeign key)
+whereClause :: forall me key. MonadEffect me => key -> Table -> me WhereClause
+whereClause key table = liftEffect $ _whereClause (unsafeToForeign key) table
 
-whereValues :: forall me values. MonadEffect me => values -> me Collection
-whereValues values = liftEffect $ _whereValues (unsafeToForeign values)
+whereValues :: forall me values. MonadEffect me => values -> Table -> me Collection
+whereValues values table = liftEffect $ _whereValues (unsafeToForeign values) table
 
 -- Helpers
 

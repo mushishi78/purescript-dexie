@@ -19,7 +19,7 @@ import Effect.Exception as Error
 import Effect.Ref as Ref
 import Foreign (unsafeFromForeign)
 import Foreign.Object as Object
-import Test.Helpers (withCleanDB, assertEqual)
+import Test.Helpers (assertEqual, withCleanDB)
 import Test.Unit (TestSuite, suite, test)
 
 tableTests :: TestSuite
@@ -31,7 +31,7 @@ tableTests = suite "table" do
     unsafeToArray :: forall item. Table -> Promise (Array item)
     unsafeToArray table = Table.toArray table # map (map unsafeFromForeign)
 
-  test "can add with an inbound key" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.add with an inbound key" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
     foo <- DB.table "foo" db
 
@@ -42,7 +42,7 @@ tableTests = suite "table" do
     assertEqual 1 (unsafeFromForeign key)
     assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
 
-  test "can add with a non-inbound key" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.add with a non-inbound key" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "")
     foo <- DB.table "foo" db
 
@@ -53,7 +53,7 @@ tableTests = suite "table" do
     assertEqual 1 (unsafeFromForeign key)
     assertEqual (Just { name: "John" }) =<< unsafeGet key foo
 
-  test "can add with an auto-incrementing inbound key" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.add with an auto-incrementing inbound key" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id")
     foo <- DB.table "foo" db
 
@@ -64,7 +64,7 @@ tableTests = suite "table" do
     assertEqual 1 (unsafeFromForeign key)
     assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
 
-  test "can add with an auto-incrementing non-inbound key" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.add with an auto-incrementing non-inbound key" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
@@ -75,7 +75,7 @@ tableTests = suite "table" do
     assertEqual 1 (unsafeFromForeign key)
     assertEqual (Just { name: "John" }) =<< unsafeGet key foo
 
-  test "can bulkAdd" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.bulkAdd" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
@@ -86,7 +86,7 @@ tableTests = suite "table" do
     assertEqual [1, 2, 3] (map unsafeFromForeign keys)
     assertEqual ["John", "Harry", "Jane"] =<< unsafeToArray foo
 
-  test "can bulkDelete" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.bulkDelete" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
@@ -99,7 +99,7 @@ tableTests = suite "table" do
     -- Check it equals what we'd expect
     assertEqual ["Harry"] =<< unsafeToArray foo
 
-  test "can bulkGet" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.bulkGet" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
@@ -112,7 +112,7 @@ tableTests = suite "table" do
     -- Check it equals what we'd expect
     assertEqual [Just "John", Just "Jane", Nothing] $ map (map unsafeFromForeign) values
 
-  test "can bulkPut" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.bulkPut" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
@@ -125,7 +125,7 @@ tableTests = suite "table" do
     -- Check it equals what we'd expect
     assertEqual ["Lizzie", "Harry", "Chelsea", "Eve"] =<< unsafeToArray foo
 
-  test "can clear" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.clear" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
@@ -141,7 +141,7 @@ tableTests = suite "table" do
     -- Check that they've gone
     assertEqual 0 =<< Table.count foo
 
-  test "can delete" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.delete" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
@@ -154,7 +154,7 @@ tableTests = suite "table" do
     -- Check it equals what we'd expect
     assertEqual ["Harry", "Jane"] =<< unsafeToArray foo
 
-  test "can each" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.each" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
@@ -170,7 +170,7 @@ tableTests = suite "table" do
     -- Check it equals what we'd expect
     assertEqual "JohnHarryJane" =<< liftEffect (Ref.read ref)
 
-  test "can filter" $ withCleanDB "db" $ \db -> toAff do
+  test "can Table.filter" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
@@ -440,3 +440,162 @@ tableTests = suite "table" do
 
     -- Check that the ref is now updated
     assertEqual { name: "John", title: "Sir" } =<< liftEffect (Ref.read ref)
+
+  test "can Table.limit" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+
+    -- Can read a limited number of rows
+    result <- Table.limit 3 foo >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["John", "Harry", "Jane"] $ map unsafeFromForeign result
+
+  test "can Table.name" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Check it equals what we'd expect
+    assertEqual "foo" =<< Table.name foo
+
+  test "can Table.offset" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+
+    -- Can skip a number of rows
+    result <- Table.offset 2 foo >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["Jane", "Chelsea", "Emily"] $ map unsafeFromForeign result
+
+  test "can Table.orderBy" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, name")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    Table.add_ { name: "John" } Nothing foo
+    Table.add_ { name: "Harry" } Nothing foo
+    Table.add_ { name: "Jane" } Nothing foo
+    Table.add_ { name: "Chelsea" } Nothing foo
+
+    -- Read in the order of their name
+    result <- Table.orderBy "name" foo >>= Collection.toArray
+
+    let getName record = record.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Chelsea", "Harry", "Jane", "John"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can Table.put to a new row" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
+    foo <- DB.table "foo" db
+
+    -- Put one row
+    key <- Table.put { id: 1, name: "John" } Nothing foo
+
+    -- Check it equals what we'd expect
+    assertEqual 1 (unsafeFromForeign key)
+    assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
+
+  test "can Table.put over an existing row" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
+    foo <- DB.table "foo" db
+
+    -- Add one row
+    Table.add_ { id: 1, name: "John" } Nothing foo
+
+    -- Put the same row
+    key <- Table.put { id: 1, name: "Sally" } Nothing foo
+
+    -- Check it equals what we'd expect
+    assertEqual 1 (unsafeFromForeign key)
+    assertEqual (Just { id: 1, name: "Sally" }) =<< unsafeGet key foo
+    assertEqual 1 =<< Table.count foo
+
+  test "can Table.reverse" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+
+    -- Can read in reverse order
+    result <- Table.reverse foo >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["Emily", "Chelsea", "Jane", "Harry", "John"] $ map unsafeFromForeign result
+
+  test "can Table.toArray" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+
+    -- Can read in all the rows
+    result <- Table.toArray foo
+
+    -- Check it equals what we'd expect
+    assertEqual ["John", "Harry", "Jane", "Chelsea", "Emily"] $ map unsafeFromForeign result
+
+  test "can Table.toCollection" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+
+    -- Can convert to a collection
+    result <- Table.toCollection foo >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["John", "Harry", "Jane", "Chelsea", "Emily"] $ map unsafeFromForeign result
+
+  test "can Table.update an existing row" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
+    foo <- DB.table "foo" db
+
+    -- Add one row
+    Table.add_ { id: 10, name: "John" } Nothing foo
+
+    -- Can update
+    count <- Table.update 10 { name: "Sally" } foo
+
+    -- Check it equals what we'd expect
+    assertEqual 1 count
+    assertEqual (Just { id: 10, name: "Sally" }) =<< unsafeGet 10 foo
+
+  test "Table.update returns 0 if not successful" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
+    foo <- DB.table "foo" db
+
+    -- Put one row
+    count <- Table.update 10 { name: "Sally" } foo
+
+    -- Check it equals what we'd expect
+    assertEqual 0 count
+    assertEqual (Nothing :: Maybe { id :: Int, name :: String }) =<< unsafeGet 10 foo
+
+  test "can Table.whereValues" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, [title+age]")
+    foo <- DB.table "foo" db
+
+    -- Add multiple rows
+    Table.add_ { title: "Sir", name: "John", age: 18 } Nothing foo
+    Table.add_ { title: "Prince", name: "Harry", age: 34 } Nothing foo
+    Table.add_ { title: "Sir", name: "Jane", age: 18 } Nothing foo
+    Table.add_ { title: "Queen", name: "Chelsea", age: 78 } Nothing foo
+
+    -- Query the table based on two values, using compound index
+    result <- Table.whereValues { title: "Sir", age: 18 } foo >>= Collection.toArray
+
+    let getName record = record.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["John", "Jane"] $ map (unsafeFromForeign >>> getName) result
