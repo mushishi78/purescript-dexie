@@ -10,6 +10,8 @@ import Dexie.Promise (toAff)
 import Dexie.Table as Table
 import Dexie.Version as Version
 import Dexie.WhereClause as WhereClause
+import Effect.Class (liftEffect)
+import Effect.Ref as Ref
 import Foreign (unsafeFromForeign)
 import Foreign.Object as Object
 import Test.Helpers (assertEqual, withCleanDB)
@@ -99,3 +101,19 @@ collectionTests = suite "collection" do
     -- Check it equals what we'd expect
     assertEqual [1, 1] $ map unsafeFromForeign result1
     assertEqual [1] $ map unsafeFromForeign result2
+
+  test "can Collection.each" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new ""
+
+    -- Add some rows
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+
+    -- Iterate over rows and add first character to ref
+    Table.toCollection foo
+      >>= Collection.each (\s -> Ref.modify_ (_ <> (String.take 1 (unsafeFromForeign s))) ref)
+
+    -- Check it equals what we'd expect
+    assertEqual "JHJCE" =<< liftEffect (Ref.read ref)
+
