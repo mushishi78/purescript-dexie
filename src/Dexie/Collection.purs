@@ -49,9 +49,9 @@ foreign import _filter :: (Foreign -> Boolean) -> Collection -> Effect Collectio
 foreign import _first :: Collection -> Promise Foreign
 foreign import _keys :: Collection -> Promise (Array Foreign)
 foreign import _last :: Collection -> Promise Foreign
-foreign import _limit :: Collection -> Effect Collection
+foreign import _limit :: Int -> Collection -> Effect Collection
 foreign import _modify :: Foreign -> Collection -> Effect Collection
-foreign import _offset :: Collection -> Effect Collection
+foreign import _offset :: Int -> Collection -> Effect Collection
 foreign import _or :: String -> Collection -> Effect WhereClause
 foreign import _primaryKeys :: Collection -> Promise (Array Foreign)
 foreign import _raw :: Collection -> Effect Collection
@@ -100,14 +100,14 @@ keys collection = _keys collection
 last :: Collection -> Promise Foreign
 last collection = _last collection
 
-limit :: forall me. MonadEffect me => Collection -> me Collection
-limit collection = liftEffect $ _limit collection
+limit :: forall me. MonadEffect me => Int -> Collection -> me Collection
+limit n collection = liftEffect $ _limit n collection
 
 modify :: forall me. MonadEffect me => Foreign -> Collection -> me Collection
 modify fnOrObject collection = liftEffect $ _modify fnOrObject collection
 
-offset :: forall me. MonadEffect me => Collection -> me Collection
-offset collection = liftEffect $ _offset collection
+offset :: forall me. MonadEffect me => Int -> Collection -> me Collection
+offset n collection = liftEffect $ _offset n collection
 
 or :: forall me. MonadEffect me => String -> Collection -> me WhereClause
 or index collection = liftEffect $ _or index collection

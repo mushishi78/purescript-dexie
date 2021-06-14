@@ -30,3 +30,29 @@ collectionTests = suite "collection" do
 
     -- Check it equals what we'd expect
     assertEqual ["Aticus", "Helena"] $ map unsafeFromForeign result
+
+  test "can Collection.clone" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    -- Create a collection and a clone
+    originalCollection <- Table.reverse foo
+    cloneCollection <- Collection.clone originalCollection
+
+    -- Mutate the cloneCollection by using it
+    result1 <- Collection.filter (unsafeFromForeign >>> String.length >>> (_ > 5)) cloneCollection
+      >>= Collection.toArray
+
+    -- Use the mutated collection
+    result2 <- Collection.offset 1 cloneCollection >>= Collection.toArray
+
+    -- Use the original collection
+    result3 <- Collection.offset 1 originalCollection >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["Helena", "Aticus"] $ map unsafeFromForeign result1
+    assertEqual ["Aticus"] $ map unsafeFromForeign result2
+    assertEqual ["Aticus", "Jason"] $ map unsafeFromForeign result3
+
