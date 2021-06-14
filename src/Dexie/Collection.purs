@@ -29,7 +29,7 @@ module Dexie.Collection (
 import Prelude
 
 import Dexie.Promise (Promise)
-import Dexie.WhereClause (WhereClause)
+import Dexie.Internal.Data (WhereClause)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Foreign (Foreign)

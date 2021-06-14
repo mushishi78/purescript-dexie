@@ -38,9 +38,8 @@ import Data.Nullable (Nullable, toNullable)
 import Data.Nullable as Nullable
 import Dexie.Collection (Collection)
 import Dexie.Internal.Data (Table) as DataRexports
-import Dexie.Internal.Data (Table, Transaction)
+import Dexie.Internal.Data (Table, Transaction, WhereClause)
 import Dexie.Promise (Promise)
-import Dexie.WhereClause (WhereClause)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (Error)

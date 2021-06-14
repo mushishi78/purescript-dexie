@@ -1,3 +1,15 @@
-module Dexie.WhereClause where
+module Dexie.WhereClause (module DataRexports, startsWith) where
 
-foreign import data WhereClause :: Type
+import Prelude
+
+import Dexie.Collection (Collection)
+import Dexie.Internal.Data (WhereClause) as DataRexports
+import Dexie.Internal.Data (WhereClause)
+import Effect (Effect)
+import Effect.Class (class MonadEffect, liftEffect)
+
+foreign import _startsWith :: String -> WhereClause -> Effect Collection
+
+startsWith :: forall me. MonadEffect me => String -> WhereClause -> me Collection
+startsWith prefix whereClause = liftEffect $ _startsWith prefix whereClause
+

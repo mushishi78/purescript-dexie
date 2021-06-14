@@ -9,6 +9,7 @@ import Dexie.DB as DB
 import Dexie.Promise (toAff)
 import Dexie.Table as Table
 import Dexie.Version as Version
+import Dexie.WhereClause as WhereClause
 import Foreign (unsafeFromForeign)
 import Foreign.Object as Object
 import Test.Helpers (assertEqual, withCleanDB)
@@ -23,7 +24,7 @@ collectionTests = suite "collection" do
 
     _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
 
-    -- Use the and as a filter
+    -- Use Collection.and as a filter
     result <- Table.toCollection foo
         >>= Collection.and (unsafeFromForeign >>> String.length >>> (_ > 5))
         >>= Collection.toArray
@@ -78,3 +79,23 @@ collectionTests = suite "collection" do
     assertEqual 1 =<< Table.count foo
     assertEqual ["Helena"] =<< map (map unsafeFromForeign) (Table.toArray foo)
 
+  test "can Collection.distinct" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id, *emails")
+    foo <- DB.table "foo" db
+
+    Table.add_ { name: "Jason", emails: ["jason99@example.com", "jason_experience@example.com"] } Nothing foo
+    Table.add_ { name: "Aticus", emails: ["atic8@example.com"] } Nothing foo
+    Table.add_ { name: "Helena", emails: ["hell_angel@example.com"] } Nothing foo
+
+    -- Create a collection with duplicates
+    collection <- Table.whereClause "emails" foo >>= WhereClause.startsWith "jason"
+
+    -- Get the result with duplicates
+    result1 <- Collection.primaryKeys collection
+
+    -- Get the result with only distinct members
+    result2 <- Collection.distinct collection >>= Collection.primaryKeys
+
+    -- Check it equals what we'd expect
+    assertEqual [1, 1] $ map unsafeFromForeign result1
+    assertEqual [1] $ map unsafeFromForeign result2
