@@ -56,3 +56,25 @@ collectionTests = suite "collection" do
     assertEqual ["Aticus"] $ map unsafeFromForeign result2
     assertEqual ["Aticus", "Jason"] $ map unsafeFromForeign result3
 
+  test "can Collection.count" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    count <- Table.toCollection foo >>= Collection.count
+
+    assertEqual 3 count
+
+  test "can Collection.delete" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    count <- Table.limit 2 foo >>= Collection.delete
+
+    assertEqual 2 count
+    assertEqual 1 =<< Table.count foo
+    assertEqual ["Helena"] =<< map (map unsafeFromForeign) (Table.toArray foo)
+
