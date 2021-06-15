@@ -19,6 +19,10 @@ import Test.Unit (TestSuite, suite, test)
 
 collectionTests :: TestSuite
 collectionTests = suite "collection" do
+  let
+    addFirstCharToRef ref str = do
+      let char = String.take 1 str
+      Ref.modify_ (_ <> char) ref
 
   test "can Collection.and" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
@@ -111,8 +115,7 @@ collectionTests = suite "collection" do
     _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
 
     -- Iterate over rows and add first character to ref
-    Table.toCollection foo
-      >>= Collection.each (\s -> Ref.modify_ (_ <> (String.take 1 (unsafeFromForeign s))) ref)
+    Table.toCollection foo >>= Collection.each (unsafeFromForeign >>> addFirstCharToRef ref)
 
     -- Check it equals what we'd expect
     assertEqual "JHJCE" =<< liftEffect (Ref.read ref)
@@ -128,8 +131,7 @@ collectionTests = suite "collection" do
     Table.add_ {} (Just "Helena") foo
 
     -- Iterate over rows and add first character to ref
-    Table.toCollection foo
-      >>= Collection.eachKey (\s -> Ref.modify_ (_ <> (String.take 1 (unsafeFromForeign s))) ref)
+    Table.toCollection foo >>= Collection.eachKey (unsafeFromForeign >>> addFirstCharToRef ref)
 
     -- Check it equals what we'd expect
     assertEqual "AHJ" =<< liftEffect (Ref.read ref)
@@ -145,8 +147,7 @@ collectionTests = suite "collection" do
     Table.add_ { age: 17 } (Just "Helena") foo
 
     -- Iterate over rows and add first character to ref
-    Table.orderBy "age" foo
-      >>= Collection.eachPrimaryKey (\s -> Ref.modify_ (_ <> (String.take 1 (unsafeFromForeign s))) ref)
+    Table.orderBy "age" foo >>= Collection.eachPrimaryKey (unsafeFromForeign >>> addFirstCharToRef ref)
 
     -- Check it equals what we'd expect
     assertEqual "HJA" =<< liftEffect (Ref.read ref)
@@ -164,8 +165,7 @@ collectionTests = suite "collection" do
     Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
 
     -- Iterate over rows and add first character to ref
-    Table.orderBy "firstName" foo
-      >>= Collection.eachUniqueKey (\s -> Ref.modify_ (_ <> (String.take 1 (unsafeFromForeign s))) ref)
+    Table.orderBy "firstName" foo >>= Collection.eachUniqueKey (unsafeFromForeign >>> addFirstCharToRef ref)
 
     -- Check it equals what we'd expect
     assertEqual "AHJ" =<< liftEffect (Ref.read ref)
