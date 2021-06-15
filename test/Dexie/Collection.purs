@@ -169,3 +169,70 @@ collectionTests = suite "collection" do
 
     -- Check it equals what we'd expect
     assertEqual "AHJ" =<< liftEffect (Ref.read ref)
+
+  test "can Collection.filter" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    -- Use Collection.filter
+    result <- Table.toCollection foo
+        >>= Collection.filter (unsafeFromForeign >>> String.length >>> (_ > 5))
+        >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["Aticus", "Helena"] $ map unsafeFromForeign result
+
+  test "can Collection.first" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    -- Use Collection.first
+    result <- Table.toCollection foo >>= Collection.first
+
+    -- Check it equals what we'd expect
+    assertEqual "Jason" $ unsafeFromForeign result
+
+  test "can Collection.keys" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, firstName, lastName")
+    foo <- DB.table "foo" db
+
+    -- Add some empty rows with keys
+    Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
+    Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
+    Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
+    Table.add_ { firstName: "Jason", lastName: "Stathem" } Nothing foo
+    Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
+
+    -- Get the keys
+    result <- Table.orderBy "lastName" foo >>= Collection.keys
+
+    -- Check it equals what we'd expect
+    assertEqual [ "Barrow", "Herron", "Stathem", "Street", "Troy"] $ map unsafeFromForeign result
+
+  test "can Collection.last" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    -- Use Collection.last
+    result <- Table.toCollection foo >>= Collection.last
+
+    -- Check it equals what we'd expect
+    assertEqual "Helena" $ unsafeFromForeign result
+
+  test "can Collection.limit" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    -- Use Collection.limit
+    result <- Table.toCollection foo >>= Collection.limit 2 >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["Jason", "Aticus"] $ map unsafeFromForeign result
