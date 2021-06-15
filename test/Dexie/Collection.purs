@@ -117,3 +117,55 @@ collectionTests = suite "collection" do
     -- Check it equals what we'd expect
     assertEqual "JHJCE" =<< liftEffect (Ref.read ref)
 
+  test "can Collection.eachKey" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new ""
+
+    -- Add some empty rows with keys
+    Table.add_ {} (Just "Jason") foo
+    Table.add_ {} (Just "Aticus") foo
+    Table.add_ {} (Just "Helena") foo
+
+    -- Iterate over rows and add first character to ref
+    Table.toCollection foo
+      >>= Collection.eachKey (\s -> Ref.modify_ (_ <> (String.take 1 (unsafeFromForeign s))) ref)
+
+    -- Check it equals what we'd expect
+    assertEqual "AHJ" =<< liftEffect (Ref.read ref)
+
+  test "can Collection.eachPrimaryKey" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" ",age")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new ""
+
+    -- Add some empty rows with keys
+    Table.add_ { age: 28 } (Just "Jason") foo
+    Table.add_ { age: 32 } (Just "Aticus") foo
+    Table.add_ { age: 17 } (Just "Helena") foo
+
+    -- Iterate over rows and add first character to ref
+    Table.orderBy "age" foo
+      >>= Collection.eachPrimaryKey (\s -> Ref.modify_ (_ <> (String.take 1 (unsafeFromForeign s))) ref)
+
+    -- Check it equals what we'd expect
+    assertEqual "HJA" =<< liftEffect (Ref.read ref)
+
+  test "can Collection.eachUniqueKey" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, firstName")
+    foo <- DB.table "foo" db
+    ref <- liftEffect $ Ref.new ""
+
+    -- Add some empty rows with keys
+    Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
+    Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
+    Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
+    Table.add_ { firstName: "Jason", lastName: "Stathem" } Nothing foo
+    Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
+
+    -- Iterate over rows and add first character to ref
+    Table.orderBy "firstName" foo
+      >>= Collection.eachUniqueKey (\s -> Ref.modify_ (_ <> (String.take 1 (unsafeFromForeign s))) ref)
+
+    -- Check it equals what we'd expect
+    assertEqual "AHJ" =<< liftEffect (Ref.read ref)
