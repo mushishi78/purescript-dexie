@@ -175,3 +175,24 @@ exports._until = function (filterFn) {
     }
   }
 }
+
+//
+// Helpers
+
+exports._createModifyMapper = function (getModifyReplaceValue) {
+  return function (isModifyIgnore) {
+    return function (isModifyDelete) {
+      return function (fn) {
+        return function (value) {
+          var modifyEffect = fn(value)
+          if (isModifyIgnore(modifyEffect)) return
+          if (isModifyDelete(modifyEffect)) {
+            delete this.value
+            return
+          }
+          this.value = getModifyReplaceValue(modifyEffect)
+        }
+      }
+    }
+  }
+}

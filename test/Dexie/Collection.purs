@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.String as String
+import Dexie.Collection (ModifyEffect(..))
 import Dexie.Collection as Collection
 import Dexie.DB as DB
 import Dexie.Promise (toAff)
@@ -12,7 +13,7 @@ import Dexie.Version as Version
 import Dexie.WhereClause as WhereClause
 import Effect.Class (liftEffect)
 import Effect.Ref as Ref
-import Foreign (unsafeFromForeign)
+import Foreign (unsafeFromForeign, unsafeToForeign)
 import Foreign.Object as Object
 import Test.Helpers (assertEqual, withCleanDB)
 import Test.Unit (TestSuite, suite, test)
@@ -236,3 +237,32 @@ collectionTests = suite "collection" do
 
     -- Check it equals what we'd expect
     assertEqual ["Jason", "Aticus"] $ map unsafeFromForeign result
+
+  test "can Collection.modify with record" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd [{}, {}] Nothing foo
+
+    -- Use Collection.modify to add boolean flag
+    _ <- Table.toCollection foo >>= Collection.modify (unsafeToForeign { old: true })
+
+    -- Check it equals what we'd expect
+    assertEqual [{ id: 1, old: true }, { id: 2, old: true }] =<< map (map unsafeFromForeign) (Table.toArray foo)
+
+  test "can Collection.modifyFn" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd [{ old: false }, { old: false }, { old: false }] Nothing foo
+
+    -- Use Collection.modifyFn
+    _ <- Table.toCollection foo >>= Collection.modifyFn (unsafeFromForeign >>> \item ->
+        case item.id of
+          1 -> ModifyDelete
+          2 -> ModifyReplace $ item { old = true }
+          _ -> ModifyIgnore
+      )
+
+    -- Check it equals what we'd expect
+    assertEqual [{ id: 2, old: true }, { id: 3, old: false }] =<< map (map unsafeFromForeign) (Table.toArray foo)

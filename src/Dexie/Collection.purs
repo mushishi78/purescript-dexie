@@ -23,13 +23,17 @@ module Dexie.Collection (
     sortBy,
     toArray,
     uniqueKeys,
-    until
+    until,
+    modifyFn,
+    ModifyEffect(..)
 ) where
 
 import Prelude
 
-import Dexie.Promise (Promise)
+import Data.Maybe (Maybe(..))
+import Data.Nullable (Nullable, toNullable)
 import Dexie.Internal.Data (WhereClause)
+import Dexie.Promise (Promise)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Foreign (Foreign)
@@ -133,3 +137,35 @@ uniqueKeys collection = _uniqueKeys collection
 until :: forall me. MonadEffect me => (Foreign -> Boolean) -> Boolean -> Collection -> me Collection
 until filterFn includeStopEntry collection = liftEffect $ _until filterFn includeStopEntry collection
 
+--- Helpers
+
+
+modifyFn :: forall v me. MonadEffect me => (Foreign -> ModifyEffect v) -> Collection -> me Collection
+modifyFn fn collection = modify (createModifyMapper fn) collection
+
+data ModifyEffect a = ModifyReplace a | ModifyIgnore | ModifyDelete
+
+foreign import _createModifyMapper :: forall v.
+    (forall a. ModifyEffect a -> Nullable a)
+    -> (forall a. ModifyEffect a -> Boolean)
+    -> (forall a. ModifyEffect a -> Boolean)
+    -> (Foreign -> ModifyEffect v)
+    -> Foreign
+
+createModifyMapper :: forall v. (Foreign -> ModifyEffect v) -> Foreign
+createModifyMapper fn = _createModifyMapper getModifyReplaceValue isModifyIgnore isModifyDelete fn
+
+getModifyReplaceValue :: forall a. ModifyEffect a -> Nullable a
+getModifyReplaceValue = toNullable <<< case _ of
+    ModifyReplace value -> Just value
+    _ -> Nothing
+
+isModifyIgnore :: forall a. ModifyEffect a -> Boolean
+isModifyIgnore = case _ of
+    ModifyIgnore -> true
+    _ -> false
+
+isModifyDelete :: forall a. ModifyEffect a -> Boolean
+isModifyDelete = case _ of
+    ModifyDelete -> true
+    _ -> false
