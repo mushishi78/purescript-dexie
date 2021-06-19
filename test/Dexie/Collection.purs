@@ -142,7 +142,7 @@ collectionTests = suite "collection" do
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
 
-    -- Add some empty rows with keys
+    -- Add some rows with a field to orderBy
     Table.add_ { age: 28 } (Just "Jason") foo
     Table.add_ { age: 32 } (Just "Aticus") foo
     Table.add_ { age: 17 } (Just "Helena") foo
@@ -158,7 +158,7 @@ collectionTests = suite "collection" do
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
 
-    -- Add some empty rows with keys
+    -- Add some rows with keys
     Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
     Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
     Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
@@ -201,7 +201,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, firstName, lastName")
     foo <- DB.table "foo" db
 
-    -- Add some empty rows with keys
+    -- Add some rows with keys
     Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
     Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
     Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
@@ -266,3 +266,141 @@ collectionTests = suite "collection" do
 
     -- Check it equals what we'd expect
     assertEqual [{ id: 2, old: true }, { id: 3, old: false }] =<< map (map unsafeFromForeign) (Table.toArray foo)
+
+  test "can Collection.offset" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    -- Use Collection.offset
+    result <- Table.toCollection foo >>= Collection.offset 1 >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["Aticus", "Helena"] $ map unsafeFromForeign result
+
+  test "can Collection.or" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name")
+    foo <- DB.table "foo" db
+
+    Table.add_ { name: "Jason" } Nothing foo
+    Table.add_ { name: "Aticus" } Nothing foo
+    Table.add_ { name: "Helena" } Nothing foo
+
+    -- Use two where queries using Collection.or
+    result <-
+      Table.whereClause "name" foo
+      >>= WhereClause.startsWith "J"
+      >>= Collection.or "name"
+      >>= WhereClause.startsWith "A"
+      >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual [{ name: "Jason" }, { name: "Aticus" }] $ map unsafeFromForeign result
+
+  test "can Collection.primaryKeys" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, firstName, lastName")
+    foo <- DB.table "foo" db
+
+    -- Add some rows with keys
+    Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
+    Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
+    Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
+    Table.add_ { firstName: "Jason", lastName: "Stathem" } Nothing foo
+    Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
+
+    -- Get the primaryKeys
+    result <- Table.orderBy "lastName" foo >>= Collection.primaryKeys
+
+    -- Check it equals what we'd expect
+    assertEqual [ 3, 1, 4, 2, 5] $ map unsafeFromForeign result
+
+  test "can bypass onReading with Collection.raw" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    -- Make the callback set the ref to the row value
+    void $ (flip Table.onReading) foo $ \value -> do
+      pure ("Sir " <> unsafeFromForeign value)
+
+    -- Add a row to the table
+    Table.add_ "John" Nothing foo
+
+    result1 <- Table.toArray foo
+    result2 <- Table.toCollection foo >>= Collection.raw >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["Sir John"] $ map unsafeFromForeign result1
+    assertEqual ["John"] $ map unsafeFromForeign result2
+
+  test "can Collection.reverse" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
+    foo <- DB.table "foo" db
+
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+
+    -- Use Collection.reverse
+    result <- Table.toCollection foo >>= Collection.reverse >>= Collection.toArray
+
+    -- Check it equals what we'd expect
+    assertEqual ["Helena", "Aticus", "Jason"] $ map unsafeFromForeign result
+
+  test "can Collection.sortBy" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name,age")
+    foo <- DB.table "foo" db
+
+    -- Add some rows with keys
+    Table.add_ { name: "Jason", age: 28 } Nothing foo
+    Table.add_ { name: "Aticus", age: 32 } Nothing foo
+    Table.add_ { name: "Helena", age: 17 } Nothing foo
+
+    -- Sort by age
+    result <- Table.toCollection foo >>= Collection.sortBy "age"
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Helena", "Jason", "Aticus"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can Collection.uniqueKeys" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, firstName")
+    foo <- DB.table "foo" db
+
+    -- Add some rows with keys
+    Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
+    Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
+    Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
+    Table.add_ { firstName: "Jason", lastName: "Stathem" } Nothing foo
+    Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
+
+    -- Get the unique first names
+    result <- Table.orderBy "firstName" foo >>= Collection.uniqueKeys
+
+    -- Check it equals what we'd expect
+    assertEqual ["Aticus", "Helena", "Jason"] $ map unsafeFromForeign result
+
+  test "can Collection.until" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++,age")
+    foo <- DB.table "foo" db
+
+    -- Add some rows with keys
+    Table.add_ { name: "Jason", age: 28 } Nothing foo
+    Table.add_ { name: "Aticus", age: 32 } Nothing foo
+    Table.add_ { name: "Helena", age: 17 } Nothing foo
+    Table.add_ { name: "Julie", age: 65 } Nothing foo
+
+    -- Only take adults
+    result1 <- Table.toCollection foo
+      >>= Collection.until (unsafeFromForeign >>> (\r -> r.age < 18)) false
+      >>= Collection.toArray
+
+    -- Only take adults and the first child
+    result2 <- Table.toCollection foo
+      >>= Collection.until (unsafeFromForeign >>> (\r -> r.age < 18)) true
+      >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Jason", "Aticus"] $ map (unsafeFromForeign >>> getName) result1
+    assertEqual ["Jason", "Aticus", "Helena"] $ map (unsafeFromForeign >>> getName) result2
