@@ -28,9 +28,139 @@ whereClauseTests = suite "whereClause" do
     Table.add_ { name: "Juliet", age: 15 } Nothing foo
 
     -- Get the rows above 18
-    result <- Table.whereClause "age" foo >>= WhereClause.above 17 >>= Collection.toArray
+    result <- Table.whereClause "age" foo >>= WhereClause.above 18 >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["John", "Janus"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.aboveOrEqual" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 55 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows aboveOrEqual 18
+    result <- Table.whereClause "age" foo >>= WhereClause.aboveOrEqual 18 >>= Collection.toArray
 
     let getName r = r.name
 
     -- Check it equals what we'd expect
     assertEqual ["Bing", "John", "Janus"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.anyOf" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 55 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Use WhereClause.anyOf
+    result <- Table.whereClause "age" foo >>= WhereClause.anyOf [15, 16, 17, 18] >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Juliet", "Charity", "Bing"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.anyOfIgnoreCase" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 55 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Use WhereClause.anyOf
+    result <- Table.whereClause "name" foo
+        >>= WhereClause.anyOfIgnoreCase ["john", "jAnUs", "juLIET"]
+        >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Janus", "John", "Juliet"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.below" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 55 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows below 18
+    result <- Table.whereClause "age" foo >>= WhereClause.below 18 >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Juliet", "Charity"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.belowOrEqual" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 55 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows belowOrEqual 18
+    result <- Table.whereClause "age" foo >>= WhereClause.belowOrEqual 18 >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Juliet", "Charity", "Bing"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.between" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows between 18 and 65 exclusive
+    result1 <- Table.whereClause "age" foo
+        >>= WhereClause.between 18 65 false false
+        >>= Collection.toArray
+
+    -- Get the rows between 18 and 65 including lower
+    result2 <- Table.whereClause "age" foo
+        >>= WhereClause.between 18 65 true false
+        >>= Collection.toArray
+
+    -- Get the rows between 18 and 65 including lower and upper
+    result3 <- Table.whereClause "age" foo
+        >>= WhereClause.between 18 65 true true
+        >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["John"] $ map (unsafeFromForeign >>> getName) result1
+    assertEqual ["Bing", "John"] $ map (unsafeFromForeign >>> getName) result2
+    assertEqual ["Bing", "John", "Janus"] $ map (unsafeFromForeign >>> getName) result3
