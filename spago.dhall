@@ -18,6 +18,7 @@
   , "stringutils"
   , "test-unit"
   , "transformers"
+  , "tuples"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

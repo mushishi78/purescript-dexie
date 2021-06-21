@@ -8,6 +8,7 @@ import Test.Dexie.Promise (promiseTests)
 import Test.Dexie.Table (tableTests)
 import Test.Dexie.Transaction (transactionTests)
 import Test.Dexie.Version (versionTests)
+import Test.Dexie.WhereClause (whereClauseTests)
 import Test.Unit.Main (runTest)
 
 main :: Effect Unit
@@ -17,3 +18,4 @@ main = runTest do
   tableTests
   transactionTests
   versionTests
+  whereClauseTests
