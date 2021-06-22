@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Dexie.DB as DB
+import Dexie.IndexedValue (class IndexedValue)
 import Dexie.Promise (Promise, toAff)
 import Dexie.Table (Table)
 import Dexie.Table as Table
@@ -16,8 +17,11 @@ import Test.Unit (TestSuite, suite, test)
 versionTests :: TestSuite
 versionTests = suite "version" do
   let
-    unsafeGet :: forall key item. key -> Table -> Promise (Maybe item)
+    unsafeGet :: forall key item. IndexedValue key => key -> Table -> Promise (Maybe item)
     unsafeGet key table = Table.get key table # map (map unsafeFromForeign)
+
+    nothingInt :: Maybe Int
+    nothingInt = Nothing
 
   test "can make an upgrade migration" do
     cleanUp
@@ -33,7 +37,7 @@ versionTests = suite "version" do
         >>= Version.stores (Object.singleton "foo" "id")
         >>= Version.upgrade_ (\_ -> do
           -- Add row to table
-          Table.add_ { id: 1, name: "John" } Nothing =<< DB.table "foo" db
+          Table.add_ { id: 1, name: "John" } nothingInt =<< DB.table "foo" db
         )
 
       DB.open db
@@ -58,19 +62,19 @@ versionTests = suite "version" do
       DB.version 2 db >>= Version.upgrade_ (\_ -> do
         -- Waste some time inserting into a different table
         bar <- DB.table "bar" db
-        Table.add_ {} Nothing bar
-        Table.add_ {} Nothing bar
-        Table.add_ {} Nothing bar
-        Table.add_ {} Nothing bar
+        Table.add_ {} nothingInt bar
+        Table.add_ {} nothingInt bar
+        Table.add_ {} nothingInt bar
+        Table.add_ {} nothingInt bar
 
         -- Add row to foo table
-        Table.add_ { name: "John" } Nothing =<< DB.table "foo" db
+        Table.add_ { name: "John" } nothingInt =<< DB.table "foo" db
       )
 
       -- Migrate from 2 -> 3 quicker
       DB.version 3 db >>= Version.upgrade_ (\_ -> do
         -- Add another row to foo table
-        Table.add_ { name: "Harry" } Nothing =<< DB.table "foo" db
+        Table.add_ { name: "Harry" } nothingInt =<< DB.table "foo" db
       )
 
       DB.open db

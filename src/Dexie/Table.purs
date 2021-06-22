@@ -37,6 +37,10 @@ import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toNullable)
 import Data.Nullable as Nullable
 import Dexie.Collection (Collection)
+import Dexie.IndexName (class IndexName)
+import Dexie.IndexName as IndexName
+import Dexie.IndexedValue (class IndexedValue)
+import Dexie.IndexedValue as IndexedValue
 import Dexie.Internal.Data (Table) as DataRexports
 import Dexie.Internal.Data (Table, Transaction, WhereClause)
 import Dexie.Promise (Promise)
@@ -97,32 +101,32 @@ foreign import _update :: Foreign -> Foreign -> Table -> Promise Int
 foreign import _whereClause :: Foreign -> Table -> Effect WhereClause
 foreign import _whereValues :: Foreign -> Table -> Effect Collection
 
-add :: forall item key. item -> Maybe key -> Table -> Promise Foreign
+add :: forall item key. IndexedValue key => item -> Maybe key -> Table -> Promise Foreign
 add item maybeKey table = _add foreignItem foreignKey table
   where
     foreignItem = unsafeToForeign item
-    foreignKey = toNullable $ map unsafeToForeign maybeKey
+    foreignKey = toNullable $ map IndexedValue.toForeign maybeKey
 
 
-bulkAdd :: forall item key. Array item -> Maybe (Array key) -> Table -> Promise (Array Foreign)
+bulkAdd :: forall item key. IndexedValue key => Array item -> Maybe (Array key) -> Table -> Promise (Array Foreign)
 bulkAdd items maybeKeys table = _bulkAdd foreignItems foreignKeys table
   where
     foreignItems = map unsafeToForeign items
-    foreignKeys = toNullable $ map (map unsafeToForeign) maybeKeys
+    foreignKeys = toNullable $ map (map IndexedValue.toForeign) maybeKeys
 
-bulkDelete :: forall key. Array key -> Table -> Promise Unit
-bulkDelete keys table = _bulkDelete (map unsafeToForeign keys) table
+bulkDelete :: forall key. IndexedValue key => Array key -> Table -> Promise Unit
+bulkDelete keys table = _bulkDelete (map IndexedValue.toForeign keys) table
 
-bulkGet :: forall key. Array key -> Table -> Promise (Array (Maybe Foreign))
+bulkGet :: forall key. IndexedValue key => Array key -> Table -> Promise (Array (Maybe Foreign))
 bulkGet keys table = map (map Nullable.toMaybe) $ _bulkGet foreignKeys table
   where
-    foreignKeys = map unsafeToForeign keys
+    foreignKeys = map IndexedValue.toForeign keys
 
-bulkPut :: forall item key. Array item -> Maybe (Array key) -> Table -> Promise (Array Foreign)
+bulkPut :: forall item key. IndexedValue key => Array item -> Maybe (Array key) -> Table -> Promise (Array Foreign)
 bulkPut items maybeKeys table = _bulkPut foreignItems foreignKeys table
   where
     foreignItems = map unsafeToForeign items
-    foreignKeys = toNullable $ map (map unsafeToForeign) maybeKeys
+    foreignKeys = toNullable $ map (map IndexedValue.toForeign) maybeKeys
 
 clear :: Table -> Promise Unit
 clear table = _clear table
@@ -130,8 +134,8 @@ clear table = _clear table
 count :: Table -> Promise Int
 count table = _count table
 
-delete :: forall key. key -> Table -> Promise Unit
-delete key table = _delete (unsafeToForeign key) table
+delete :: forall key. IndexedValue key => key -> Table -> Promise Unit
+delete key table = _delete (IndexedValue.toForeign key) table
 
 each :: (Foreign -> Effect Unit) -> Table -> Promise Unit
 each onEach table = _each onEach table
@@ -139,13 +143,13 @@ each onEach table = _each onEach table
 filter :: forall me. MonadEffect me => (Foreign -> Boolean) -> Table -> me Collection
 filter filterFn table = liftEffect $ _filter filterFn table
 
-get :: forall key. key -> Table -> Promise (Maybe Foreign)
-get key table = map Nullable.toMaybe $ _get (unsafeToForeign key) table
+get :: forall key. IndexedValue key => key -> Table -> Promise (Maybe Foreign)
+get key table = map Nullable.toMaybe $ _get (IndexedValue.toForeign key) table
 
-onCreating :: forall me key. MonadEffect me => (OnCreatingArgs -> Effect (Maybe key)) -> Table -> me (Effect Unit)
+onCreating :: forall me key. IndexedValue key => MonadEffect me => (OnCreatingArgs -> Effect (Maybe key)) -> Table -> me (Effect Unit)
 onCreating callback table = liftEffect $ _onCreating nullableForeignCallback table
   where
-    nullableForeignCallback args = map toNullable $ map (map unsafeToForeign) $ callback args
+    nullableForeignCallback args = map toNullable $ map (map IndexedValue.toForeign) $ callback args
 
 onDeleting :: forall me. MonadEffect me => (OnDeletingArgs -> Effect Unit) -> Table -> me (Effect Unit)
 onDeleting callback table = liftEffect $ _onDeleting callback table
@@ -172,11 +176,11 @@ offset n table = liftEffect $ _offset n table
 orderBy :: forall me. MonadEffect me => String -> Table -> me Collection
 orderBy index table = liftEffect $ _orderBy index table
 
-put :: forall item key. item -> Maybe key -> Table -> Promise Foreign
+put :: forall item key. IndexedValue key => item -> Maybe key -> Table -> Promise Foreign
 put item maybeKey table = _put foreignItem foreignKey table
   where
     foreignItem = unsafeToForeign item
-    foreignKey = toNullable $ map unsafeToForeign maybeKey
+    foreignKey = toNullable $ map IndexedValue.toForeign maybeKey
 
 reverse :: forall me. MonadEffect me => Table -> me Collection
 reverse table = liftEffect $ _reverse table
@@ -187,22 +191,22 @@ toArray table = _toArray table
 toCollection :: forall me. MonadEffect me => Table -> me Collection
 toCollection table = liftEffect $ _toCollection table
 
-update :: forall key changes. key -> changes -> Table -> Promise Int
-update key changes table = _update (unsafeToForeign key) (unsafeToForeign changes) table
+update :: forall key changes. IndexedValue key => key -> changes -> Table -> Promise Int
+update key changes table = _update (IndexedValue.toForeign key) (unsafeToForeign changes) table
 
-whereClause :: forall me key. MonadEffect me => key -> Table -> me WhereClause
-whereClause key table = liftEffect $ _whereClause (unsafeToForeign key) table
+whereClause :: forall me indexName. IndexName indexName => MonadEffect me => indexName -> Table -> me WhereClause
+whereClause indexName table = liftEffect $ _whereClause (IndexName.toForeign indexName) table
 
 whereValues :: forall me values. MonadEffect me => values -> Table -> me Collection
 whereValues values table = liftEffect $ _whereValues (unsafeToForeign values) table
 
 -- Helpers
 
-add_ :: forall a b. a -> Maybe b -> Table -> Promise Unit
+add_ :: forall item key. IndexedValue key => item -> Maybe key -> Table -> Promise Unit
 add_ item maybeKey table = void $ add item maybeKey table
 
-put_ :: forall item key. item -> Maybe key -> Table -> Promise Unit
+put_ :: forall item key. IndexedValue key => item -> Maybe key -> Table -> Promise Unit
 put_ item maybeKey table = void $ put item maybeKey table
 
-update_ :: forall key changes. key -> changes -> Table -> Promise Unit
+update_ :: forall key changes. IndexedValue key => key -> changes -> Table -> Promise Unit
 update_ key changes table = void $ update key changes table

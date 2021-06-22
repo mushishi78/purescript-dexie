@@ -9,10 +9,12 @@ import Data.Maybe (Maybe(..))
 import Data.String.Utils (startsWith)
 import Dexie.Collection as Collection
 import Dexie.DB as DB
+import Dexie.IndexedValue (class IndexedValue)
 import Dexie.Promise (Promise, toAff)
 import Dexie.Table (Table)
 import Dexie.Table as Table
 import Dexie.Version as Version
+import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Exception (error, throwException)
 import Effect.Exception as Error
@@ -25,21 +27,28 @@ import Test.Unit (TestSuite, suite, test)
 tableTests :: TestSuite
 tableTests = suite "table" do
   let
-    unsafeGet :: forall key item. key -> Table -> Promise (Maybe item)
+    unsafeGet :: forall key item. IndexedValue key => key -> Table -> Promise (Maybe item)
     unsafeGet key table = Table.get key table # map (map unsafeFromForeign)
 
     unsafeToArray :: forall item. Table -> Promise (Array item)
     unsafeToArray table = Table.toArray table # map (map unsafeFromForeign)
+
+    nothingInt :: Maybe Int
+    nothingInt = Nothing
+
+    nothingIntArray :: Maybe (Array Int)
+    nothingIntArray = Nothing
 
   test "can Table.add with an inbound key" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
     foo <- DB.table "foo" db
 
     -- Add one row
-    key <- Table.add { id: 1, name: "John" } Nothing foo
+    foreignKey <- Table.add { id: 1, name: "John" } nothingInt foo
+    let key = unsafeFromForeign foreignKey :: Int
 
     -- Check it equals what we'd expect
-    assertEqual 1 (unsafeFromForeign key)
+    assertEqual 1 key
     assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
 
   test "can Table.add with a non-inbound key" $ withCleanDB "db" $ \db -> toAff do
@@ -47,10 +56,11 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add one row
-    key <- Table.add { name: "John" } (Just 1) foo
+    foreignKey <- Table.add { name: "John" } (Just 1) foo
+    let key = unsafeFromForeign foreignKey :: Int
 
     -- Check it equals what we'd expect
-    assertEqual 1 (unsafeFromForeign key)
+    assertEqual 1 key
     assertEqual (Just { name: "John" }) =<< unsafeGet key foo
 
   test "can Table.add with an auto-incrementing inbound key" $ withCleanDB "db" $ \db -> toAff do
@@ -58,10 +68,11 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add one row
-    key <- Table.add { name: "John" } Nothing foo
+    foreignKey <- Table.add { name: "John" } nothingInt foo
+    let key = unsafeFromForeign foreignKey :: Int
 
     -- Check it equals what we'd expect
-    assertEqual 1 (unsafeFromForeign key)
+    assertEqual 1 key
     assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
 
   test "can Table.add with an auto-incrementing non-inbound key" $ withCleanDB "db" $ \db -> toAff do
@@ -69,10 +80,11 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add one row
-    key <- Table.add { name: "John" } Nothing foo
+    foreignKey <- Table.add { name: "John" } nothingInt foo
+    let key = unsafeFromForeign foreignKey :: Int
 
     -- Check it equals what we'd expect
-    assertEqual 1 (unsafeFromForeign key)
+    assertEqual 1 key
     assertEqual (Just { name: "John" }) =<< unsafeGet key foo
 
   test "can Table.bulkAdd" $ withCleanDB "db" $ \db -> toAff do
@@ -80,7 +92,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    keys <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+    keys <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
 
     -- Check it equals what we'd expect
     assertEqual [1, 2, 3] (map unsafeFromForeign keys)
@@ -91,7 +103,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
 
     -- And delete some of them
     Table.bulkDelete [1, 3] foo
@@ -104,7 +116,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
 
     -- And read specific ones
     values <- Table.bulkGet [1, 3, 25] foo
@@ -117,7 +129,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
 
     -- And put specific ones
     _ <- Table.bulkPut ["Lizzie", "Chelsea", "Eve"] (Just [1, 3, 25]) foo
@@ -130,7 +142,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
 
     -- Check that they're there
     assertEqual 3 =<< Table.count foo
@@ -146,7 +158,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
 
     -- And delete some of them
     Table.delete 1 foo
@@ -160,7 +172,7 @@ tableTests = suite "table" do
     ref <- liftEffect $ Ref.new ""
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
 
     -- And iterate over them
     (flip Table.each) foo $ \item -> do
@@ -175,7 +187,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
 
     -- Filter the table with a predicate
     values <- Table.filter (\item -> startsWith "J" (unsafeFromForeign item)) foo >>= Collection.toArray
@@ -191,13 +203,13 @@ tableTests = suite "table" do
     -- Make the callback set the ref to true
     void $ (flip Table.onCreating) foo $ \_ -> do
       Ref.write true ref
-      pure Nothing
+      pure nothingInt
 
     -- Check that the ref is currently false
     assertEqual false =<< liftEffect (Ref.read ref)
 
     -- Add to the table, causing the callback to be called
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
 
     -- Check that the ref is now true
     assertEqual true =<< liftEffect (Ref.read ref)
@@ -211,7 +223,7 @@ tableTests = suite "table" do
       pure (Just "key")
 
     -- Add to the table, causing the callback to be called
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
 
     -- Check that the row has the new key
     assertEqual (Just "John") =<< unsafeGet "key" foo
@@ -228,13 +240,13 @@ tableTests = suite "table" do
       args.setOnSuccess $ \primaryKey -> do
         Ref.write (unsafeFromForeign primaryKey) ref
 
-      pure Nothing
+      pure nothingInt
 
     -- Check that the ref is currently 28
     assertEqual 28 =<< liftEffect (Ref.read ref)
 
     -- Add to the table, causing the callback to be called
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
 
     -- Check that the ref is now 1
     assertEqual 1 =<< liftEffect (Ref.read ref)
@@ -251,7 +263,7 @@ tableTests = suite "table" do
       args.setOnError $ \err -> do
         Ref.write err ref
 
-      pure Nothing
+      pure nothingInt
 
     -- Check that the ref is currently original error
     assertEqual "Noop" =<< map Error.message (liftEffect (Ref.read ref))
@@ -269,10 +281,10 @@ tableTests = suite "table" do
 
     -- Make the callback throw an error
     void $ (flip Table.onCreating) foo $ \_ -> do
-      throwException (error "dont like this")
+      throwException (error "dont like this") :: Effect (Maybe Int)
 
     -- Try to add to a row
-    maybeError <- try $ Table.add_ "John" Nothing foo
+    maybeError <- try $ Table.add_ "John" nothingInt foo
 
     -- Check that the result of the add is an error
     assertEqual (Left "dont like this") $ lmap Error.message maybeError
@@ -285,20 +297,20 @@ tableTests = suite "table" do
     -- Make the callback increment the ref
     unsubscribe <- (flip Table.onCreating) foo $ \_ -> do
       liftEffect $ Ref.modify_ (_ + 1) ref
-      pure Nothing
+      pure nothingInt
 
     -- Increment the counter a few times
-    Table.add_ "John" Nothing foo
-    Table.add_ "Sara" Nothing foo
-    Table.add_ "Pauline" Nothing foo
+    Table.add_ "John" nothingInt foo
+    Table.add_ "Sara" nothingInt foo
+    Table.add_ "Pauline" nothingInt foo
 
     -- Unsubscribe the callback
     liftEffect $ unsubscribe
 
     -- Add a few times to show it's no longer counting
-    Table.add_ "Harriet" Nothing foo
-    Table.add_ "Jessica" Nothing foo
-    Table.add_ "Eve" Nothing foo
+    Table.add_ "Harriet" nothingInt foo
+    Table.add_ "Jessica" nothingInt foo
+    Table.add_ "Eve" nothingInt foo
 
     -- Check that the counter is what we expect
     assertEqual 3 =<< liftEffect (Ref.read ref)
@@ -313,7 +325,7 @@ tableTests = suite "table" do
       Ref.write true ref
 
     -- Add a row to the table
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
 
     -- Check that the ref is currently false
     assertEqual false =<< liftEffect (Ref.read ref)
@@ -333,7 +345,7 @@ tableTests = suite "table" do
       throwException (error "dont like this")
 
     -- Try to add to a row
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
     maybeError <- try $ Table.delete  1 foo
 
     -- Check that the result of the add is an error
@@ -350,7 +362,7 @@ tableTests = suite "table" do
       pure value
 
     -- Add a row to the table
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
 
     -- Check that the ref is currently empty
     assertEqual "" =<< liftEffect (Ref.read ref)
@@ -370,7 +382,7 @@ tableTests = suite "table" do
       pure ("Sir " <> unsafeFromForeign value)
 
     -- Add a row to the table
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
 
     -- Check that get now prefixes the value
     assertEqual (Just "Sir John") =<< unsafeGet 1 foo
@@ -386,7 +398,7 @@ tableTests = suite "table" do
       pure Nothing
 
     -- Add a row to the table
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
 
     -- Check that the ref is currently false
     assertEqual false =<< liftEffect (Ref.read ref)
@@ -407,7 +419,7 @@ tableTests = suite "table" do
       pure $ Just $ { name, title: "Prince" }
 
     -- Add a row to the table
-    Table.add_ { name: "John" } Nothing foo
+    Table.add_ { name: "John" } nothingInt foo
 
     -- Update the row, causing the callback to be called
     Table.update_ 1 { name: "Harry" } foo
@@ -430,7 +442,7 @@ tableTests = suite "table" do
       pure Nothing
 
     -- Add a row to the table
-    Table.add_ { name: "John" } Nothing foo
+    Table.add_ { name: "John" } nothingInt foo
 
     -- Check that the ref is currently empty
     assertEqual { name: "", title: "" } =<< liftEffect (Ref.read ref)
@@ -446,7 +458,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
 
     -- Can read a limited number of rows
     result <- Table.limit 3 foo >>= Collection.toArray
@@ -466,7 +478,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
 
     -- Can skip a number of rows
     result <- Table.offset 2 foo >>= Collection.toArray
@@ -479,10 +491,10 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    Table.add_ { name: "John" } Nothing foo
-    Table.add_ { name: "Harry" } Nothing foo
-    Table.add_ { name: "Jane" } Nothing foo
-    Table.add_ { name: "Chelsea" } Nothing foo
+    Table.add_ { name: "John" } nothingInt foo
+    Table.add_ { name: "Harry" } nothingInt foo
+    Table.add_ { name: "Jane" } nothingInt foo
+    Table.add_ { name: "Chelsea" } nothingInt foo
 
     -- Read in the order of their name
     result <- Table.orderBy "name" foo >>= Collection.toArray
@@ -497,10 +509,11 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Put one row
-    key <- Table.put { id: 1, name: "John" } Nothing foo
+    foreignKey <- Table.put { id: 1, name: "John" } nothingInt foo
+    let key = unsafeFromForeign foreignKey :: Int
 
     -- Check it equals what we'd expect
-    assertEqual 1 (unsafeFromForeign key)
+    assertEqual 1 key
     assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
 
   test "can Table.put over an existing row" $ withCleanDB "db" $ \db -> toAff do
@@ -508,13 +521,14 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add one row
-    Table.add_ { id: 1, name: "John" } Nothing foo
+    Table.add_ { id: 1, name: "John" } nothingInt foo
 
     -- Put the same row
-    key <- Table.put { id: 1, name: "Sally" } Nothing foo
+    foreignKey <- Table.put { id: 1, name: "Sally" } nothingInt foo
+    let key = unsafeFromForeign foreignKey :: Int
 
     -- Check it equals what we'd expect
-    assertEqual 1 (unsafeFromForeign key)
+    assertEqual 1 key
     assertEqual (Just { id: 1, name: "Sally" }) =<< unsafeGet key foo
     assertEqual 1 =<< Table.count foo
 
@@ -523,7 +537,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
 
     -- Can read in reverse order
     result <- Table.reverse foo >>= Collection.toArray
@@ -536,7 +550,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
 
     -- Can read in all the rows
     result <- Table.toArray foo
@@ -549,7 +563,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
 
     -- Can convert to a collection
     result <- Table.toCollection foo >>= Collection.toArray
@@ -562,7 +576,7 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add one row
-    Table.add_ { id: 10, name: "John" } Nothing foo
+    Table.add_ { id: 10, name: "John" } nothingInt foo
 
     -- Can update
     count <- Table.update 10 { name: "Sally" } foo
@@ -587,10 +601,10 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    Table.add_ { title: "Sir", name: "John", age: 18 } Nothing foo
-    Table.add_ { title: "Prince", name: "Harry", age: 34 } Nothing foo
-    Table.add_ { title: "Sir", name: "Jane", age: 18 } Nothing foo
-    Table.add_ { title: "Queen", name: "Chelsea", age: 78 } Nothing foo
+    Table.add_ { title: "Sir", name: "John", age: 18 } nothingInt foo
+    Table.add_ { title: "Prince", name: "Harry", age: 34 } nothingInt foo
+    Table.add_ { title: "Sir", name: "Jane", age: 18 } nothingInt foo
+    Table.add_ { title: "Queen", name: "Chelsea", age: 78 } nothingInt foo
 
     -- Query the table based on two values, using compound index
     result <- Table.whereValues { title: "Sir", age: 18 } foo >>= Collection.toArray

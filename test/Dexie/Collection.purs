@@ -25,11 +25,17 @@ collectionTests = suite "collection" do
       let char = String.take 1 str
       Ref.modify_ (_ <> char) ref
 
+    nothingIntArray :: Maybe (Array Int)
+    nothingIntArray = Nothing
+
+    nothingInt :: Maybe Int
+    nothingInt = Nothing
+
   test "can Collection.and" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     -- Use Collection.and as a filter
     result <- Table.toCollection foo
@@ -43,7 +49,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     -- Create a collection and a clone
     originalCollection <- Table.reverse foo
@@ -68,7 +74,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     count <- Table.toCollection foo >>= Collection.count
 
@@ -78,7 +84,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     count <- Table.limit 2 foo >>= Collection.delete
 
@@ -90,9 +96,9 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id, *emails")
     foo <- DB.table "foo" db
 
-    Table.add_ { name: "Jason", emails: ["jason99@example.com", "jason_experience@example.com"] } Nothing foo
-    Table.add_ { name: "Aticus", emails: ["atic8@example.com"] } Nothing foo
-    Table.add_ { name: "Helena", emails: ["hell_angel@example.com"] } Nothing foo
+    Table.add_ { name: "Jason", emails: ["jason99@example.com", "jason_experience@example.com"] } nothingInt foo
+    Table.add_ { name: "Aticus", emails: ["atic8@example.com"] } nothingInt foo
+    Table.add_ { name: "Helena", emails: ["hell_angel@example.com"] } nothingInt foo
 
     -- Create a collection with duplicates
     collection <- Table.whereClause "emails" foo >>= WhereClause.startsWith "jason"
@@ -113,7 +119,7 @@ collectionTests = suite "collection" do
     ref <- liftEffect $ Ref.new ""
 
     -- Add some rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] Nothing foo
+    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
 
     -- Iterate over rows and add first character to ref
     Table.toCollection foo >>= Collection.each (unsafeFromForeign >>> addFirstCharToRef ref)
@@ -159,11 +165,11 @@ collectionTests = suite "collection" do
     ref <- liftEffect $ Ref.new ""
 
     -- Add some rows with keys
-    Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
-    Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
-    Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
-    Table.add_ { firstName: "Jason", lastName: "Stathem" } Nothing foo
-    Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
+    Table.add_ { firstName: "Jason", lastName: "Herron" } nothingInt foo
+    Table.add_ { firstName: "Aticus", lastName: "Street" } nothingInt foo
+    Table.add_ { firstName: "Helena", lastName: "Barrow" } nothingInt foo
+    Table.add_ { firstName: "Jason", lastName: "Stathem" } nothingInt foo
+    Table.add_ { firstName: "Helena", lastName: "Troy" } nothingInt foo
 
     -- Iterate over rows and add first character to ref
     Table.orderBy "firstName" foo >>= Collection.eachUniqueKey (unsafeFromForeign >>> addFirstCharToRef ref)
@@ -175,7 +181,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     -- Use Collection.filter
     result <- Table.toCollection foo
@@ -189,7 +195,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     -- Use Collection.first
     result <- Table.toCollection foo >>= Collection.first
@@ -202,11 +208,11 @@ collectionTests = suite "collection" do
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
-    Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
-    Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
-    Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
-    Table.add_ { firstName: "Jason", lastName: "Stathem" } Nothing foo
-    Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
+    Table.add_ { firstName: "Jason", lastName: "Herron" } nothingInt foo
+    Table.add_ { firstName: "Aticus", lastName: "Street" } nothingInt foo
+    Table.add_ { firstName: "Helena", lastName: "Barrow" } nothingInt foo
+    Table.add_ { firstName: "Jason", lastName: "Stathem" } nothingInt foo
+    Table.add_ { firstName: "Helena", lastName: "Troy" } nothingInt foo
 
     -- Get the keys
     result <- Table.orderBy "lastName" foo >>= Collection.keys
@@ -218,7 +224,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     -- Use Collection.last
     result <- Table.toCollection foo >>= Collection.last
@@ -230,7 +236,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     -- Use Collection.limit
     result <- Table.toCollection foo >>= Collection.limit 2 >>= Collection.toArray
@@ -242,7 +248,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd [{}, {}] Nothing foo
+    _ <- Table.bulkAdd [{}, {}] nothingIntArray foo
 
     -- Use Collection.modify to add boolean flag
     _ <- Table.toCollection foo >>= Collection.modify (unsafeToForeign { old: true })
@@ -254,7 +260,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd [{ old: false }, { old: false }, { old: false }] Nothing foo
+    _ <- Table.bulkAdd [{ old: false }, { old: false }, { old: false }] nothingIntArray foo
 
     -- Use Collection.modifyFn
     _ <- Table.toCollection foo >>= Collection.modifyFn (unsafeFromForeign >>> \item ->
@@ -271,7 +277,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     -- Use Collection.offset
     result <- Table.toCollection foo >>= Collection.offset 1 >>= Collection.toArray
@@ -283,9 +289,9 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name")
     foo <- DB.table "foo" db
 
-    Table.add_ { name: "Jason" } Nothing foo
-    Table.add_ { name: "Aticus" } Nothing foo
-    Table.add_ { name: "Helena" } Nothing foo
+    Table.add_ { name: "Jason" } nothingInt foo
+    Table.add_ { name: "Aticus" } nothingInt foo
+    Table.add_ { name: "Helena" } nothingInt foo
 
     -- Use two where queries using Collection.or
     result <-
@@ -303,11 +309,11 @@ collectionTests = suite "collection" do
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
-    Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
-    Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
-    Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
-    Table.add_ { firstName: "Jason", lastName: "Stathem" } Nothing foo
-    Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
+    Table.add_ { firstName: "Jason", lastName: "Herron" } nothingInt foo
+    Table.add_ { firstName: "Aticus", lastName: "Street" } nothingInt foo
+    Table.add_ { firstName: "Helena", lastName: "Barrow" } nothingInt foo
+    Table.add_ { firstName: "Jason", lastName: "Stathem" } nothingInt foo
+    Table.add_ { firstName: "Helena", lastName: "Troy" } nothingInt foo
 
     -- Get the primaryKeys
     result <- Table.orderBy "lastName" foo >>= Collection.primaryKeys
@@ -324,7 +330,7 @@ collectionTests = suite "collection" do
       pure ("Sir " <> unsafeFromForeign value)
 
     -- Add a row to the table
-    Table.add_ "John" Nothing foo
+    Table.add_ "John" nothingInt foo
 
     result1 <- Table.toArray foo
     result2 <- Table.toCollection foo >>= Collection.raw >>= Collection.toArray
@@ -337,7 +343,7 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] Nothing foo
+    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
 
     -- Use Collection.reverse
     result <- Table.toCollection foo >>= Collection.reverse >>= Collection.toArray
@@ -350,9 +356,9 @@ collectionTests = suite "collection" do
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
-    Table.add_ { name: "Jason", age: 28 } Nothing foo
-    Table.add_ { name: "Aticus", age: 32 } Nothing foo
-    Table.add_ { name: "Helena", age: 17 } Nothing foo
+    Table.add_ { name: "Jason", age: 28 } nothingInt foo
+    Table.add_ { name: "Aticus", age: 32 } nothingInt foo
+    Table.add_ { name: "Helena", age: 17 } nothingInt foo
 
     -- Sort by age
     result <- Table.toCollection foo >>= Collection.sortBy "age"
@@ -367,11 +373,11 @@ collectionTests = suite "collection" do
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
-    Table.add_ { firstName: "Jason", lastName: "Herron" } Nothing foo
-    Table.add_ { firstName: "Aticus", lastName: "Street" } Nothing foo
-    Table.add_ { firstName: "Helena", lastName: "Barrow" } Nothing foo
-    Table.add_ { firstName: "Jason", lastName: "Stathem" } Nothing foo
-    Table.add_ { firstName: "Helena", lastName: "Troy" } Nothing foo
+    Table.add_ { firstName: "Jason", lastName: "Herron" } nothingInt foo
+    Table.add_ { firstName: "Aticus", lastName: "Street" } nothingInt foo
+    Table.add_ { firstName: "Helena", lastName: "Barrow" } nothingInt foo
+    Table.add_ { firstName: "Jason", lastName: "Stathem" } nothingInt foo
+    Table.add_ { firstName: "Helena", lastName: "Troy" } nothingInt foo
 
     -- Get the unique first names
     result <- Table.orderBy "firstName" foo >>= Collection.uniqueKeys
@@ -384,10 +390,10 @@ collectionTests = suite "collection" do
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
-    Table.add_ { name: "Jason", age: 28 } Nothing foo
-    Table.add_ { name: "Aticus", age: 32 } Nothing foo
-    Table.add_ { name: "Helena", age: 17 } Nothing foo
-    Table.add_ { name: "Julie", age: 65 } Nothing foo
+    Table.add_ { name: "Jason", age: 28 } nothingInt foo
+    Table.add_ { name: "Aticus", age: 32 } nothingInt foo
+    Table.add_ { name: "Helena", age: 17 } nothingInt foo
+    Table.add_ { name: "Julie", age: 65 } nothingInt foo
 
     -- Only take adults
     result1 <- Table.toCollection foo
