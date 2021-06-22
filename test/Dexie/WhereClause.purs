@@ -3,6 +3,7 @@ module Test.Dexie.WhereClause where
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Dexie.Collection as Collection
 import Dexie.DB as DB
 import Dexie.Promise (toAff)
@@ -164,3 +165,194 @@ whereClauseTests = suite "whereClause" do
     assertEqual ["John"] $ map (unsafeFromForeign >>> getName) result1
     assertEqual ["Bing", "John"] $ map (unsafeFromForeign >>> getName) result2
     assertEqual ["Bing", "John", "Janus"] $ map (unsafeFromForeign >>> getName) result3
+
+  test "can WhereClause.equals" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 18 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 18 } Nothing foo
+
+    -- Get the rows equal to 18
+    result <- Table.whereClause "age" foo >>= WhereClause.equals 18 >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Bing", "Charity", "Juliet"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.equalsIgnoreCase" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows equal ignoring case to jAnuS
+    result <- Table.whereClause "name" foo >>= WhereClause.equalsIgnoreCase "jAnuS" >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Janus"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.inAnyRange" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    let
+      ranges =
+        [ Tuple 15 18
+        , Tuple 40 65
+        ]
+
+    -- Get the rows between ranges exclusive
+    result1 <- Table.whereClause "age" foo
+        >>= WhereClause.inAnyRange ranges false false
+        >>= Collection.toArray
+
+    -- Get the rows between ranges including lower
+    result2 <- Table.whereClause "age" foo
+        >>= WhereClause.inAnyRange ranges true false
+        >>= Collection.toArray
+
+    -- Get the rows between ranges including lower and upper
+    result3 <- Table.whereClause "age" foo
+        >>= WhereClause.inAnyRange ranges true true
+        >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Charity"] $ map (unsafeFromForeign >>> getName) result1
+    assertEqual ["Juliet", "Charity"] $ map (unsafeFromForeign >>> getName) result2
+    assertEqual ["Juliet", "Charity", "Bing", "Janus"] $ map (unsafeFromForeign >>> getName) result3
+
+  test "can WhereClause.noneOf" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows age is not any of 15 25 35 45 55 65
+    result <- Table.whereClause "age" foo >>= WhereClause.noneOf [15, 25, 35, 45, 55, 65] >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Charity", "Bing", "John"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.notEqual" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows age is not equal to 15
+    result <- Table.whereClause "age" foo >>= WhereClause.notEqual 15 >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Charity", "Bing", "John", "Janus"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.startsWith" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows where name starts with J
+    result <- Table.whereClause "name" foo >>= WhereClause.startsWith "J" >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Janus", "John", "Juliet"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.startsWithAnyOf" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows where name starts with B or C
+    result <- Table.whereClause "name" foo >>= WhereClause.startsWithAnyOf ["B", "C"] >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Bing", "Charity"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.startsWithIgnoreCase" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows where name starts with j
+    result <- Table.whereClause "name" foo >>= WhereClause.startsWithIgnoreCase "j" >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Janus", "John", "Juliet"] $ map (unsafeFromForeign >>> getName) result
+
+  test "can WhereClause.startsWithAnyOfIgnoreCase" $ withCleanDB "db" $ \db -> toAff do
+    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    foo <- DB.table "foo" db
+
+    -- Add some data
+    Table.add_ { name: "John", age: 23 } Nothing foo
+    Table.add_ { name: "Janus", age: 65 } Nothing foo
+    Table.add_ { name: "Charity", age: 16 } Nothing foo
+    Table.add_ { name: "Bing", age: 18 } Nothing foo
+    Table.add_ { name: "Juliet", age: 15 } Nothing foo
+
+    -- Get the rows where name starts with b or c
+    result <- Table.whereClause "name" foo >>= WhereClause.startsWithAnyOfIgnoreCase ["b", "c"] >>= Collection.toArray
+
+    let getName r = r.name
+
+    -- Check it equals what we'd expect
+    assertEqual ["Bing", "Charity"] $ map (unsafeFromForeign >>> getName) result

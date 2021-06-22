@@ -79,8 +79,10 @@ exports._equalsIgnoreCase = function (key) {
 exports._inAnyRange = function (ranges) {
   return function (includeLowers) {
     return function (includeUppers) {
-      return function () {
-        return whereClause.inAnyRange(ranges, { includeLowers: includeLowers, includeUppers: includeUppers })
+      return function (whereClause) {
+        return function () {
+          return whereClause.inAnyRange(ranges, { includeLowers: includeLowers, includeUppers: includeUppers })
+        }
       }
     }
   }
