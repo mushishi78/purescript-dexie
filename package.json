@@ -5,6 +5,7 @@
     "serve-tests": "cd test && http-server"
   },
   "devDependencies": {
+    "bower": "^1.8.12",
     "dexie": "^3.0.3",
     "esbuild": "^0.11.20",
     "http-server": "^0.12.3",
