@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "bundle-tests": "spago build && esbuild test/run.js --bundle --outfile=test/run.bundled.js",
+    "bundle-tests": "spago -x test.dhall build && esbuild test/run.js --bundle --outfile=test/run.bundled.js",
     "serve-tests": "cd test && http-server"
   },
   "devDependencies": {

@@ -15,22 +15,16 @@
     ],
     "dependencies": {
         "purescript-aff": "^v6.0.0",
-        "purescript-bifunctors": "^v5.0.0",
         "purescript-control": "^v5.0.0",
         "purescript-effect": "^v3.0.0",
         "purescript-either": "^v5.0.0",
         "purescript-exceptions": "^v5.0.0",
-        "purescript-foldable-traversable": "^v5.0.1",
         "purescript-foreign": "^v6.0.1",
         "purescript-foreign-object": "^v3.0.0",
         "purescript-maybe": "^v5.0.0",
         "purescript-nullable": "^v5.0.0",
         "purescript-prelude": "^v5.0.0",
         "purescript-psci-support": "^v5.0.0",
-        "purescript-refs": "^v5.0.0",
-        "purescript-strings": "^v5.0.0",
-        "purescript-stringutils": "^v0.0.11",
-        "purescript-test-unit": "^v16.0.0",
         "purescript-transformers": "^v5.1.0",
         "purescript-tuples": "^v6.0.1"
     }
