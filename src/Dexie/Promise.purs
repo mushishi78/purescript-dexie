@@ -50,33 +50,33 @@ foreign import _join :: forall v. LaunchedPromise v -> Promise v
 instance functorPromise :: Functor Promise where
   map fn = _then (fn >>> pure)
 
-instance applyPromise ∷ Apply Promise where
+instance applyPromise :: Apply Promise where
   apply = ap
 
-instance applicativePromise ∷ Applicative Promise where
+instance applicativePromise :: Applicative Promise where
   pure = resolve
 
-instance bindPromise ∷ Bind Promise where
+instance bindPromise :: Bind Promise where
   bind = flip _then
 
-instance monadPromise ∷ Monad Promise
+instance monadPromise :: Monad Promise
 
-instance semigroupPromise ∷ Semigroup a ⇒ Semigroup (Promise a) where
+instance semigroupPromise :: Semigroup a ⇒ Semigroup (Promise a) where
   append = lift2 append
 
-instance monoidPromise ∷ Monoid a ⇒ Monoid (Promise a) where
+instance monoidPromise :: Monoid a ⇒ Monoid (Promise a) where
   mempty = pure mempty
 
-instance altPromise ∷ Alt Promise where
+instance altPromise :: Alt Promise where
   alt a1 a2 = catch (const a2) a1
 
-instance monadThrowPromise ∷ MonadThrow Error Promise where
+instance monadThrowPromise :: MonadThrow Error Promise where
   throwError = reject
 
-instance monadErrorPromise ∷ MonadError Error Promise where
+instance monadErrorPromise :: MonadError Error Promise where
   catchError = flip catch
 
-instance monadEffectPromise ∷ MonadEffect Promise where
+instance monadEffectPromise :: MonadEffect Promise where
   liftEffect = _liftEffect
 
 launch :: forall v me. MonadEffect me => Promise v -> me (LaunchedPromise v)
