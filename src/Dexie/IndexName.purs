@@ -3,6 +3,10 @@ module Dexie.IndexName where
 import Data.Tuple (Tuple(..))
 import Foreign (Foreign, unsafeToForeign)
 
+-- | IndexName represents either the string key of an index,
+-- | or an array of index keys for compound indexes.
+-- |
+-- | Documentation: [dexie.org/docs/Table/Table.where()](https://dexie.org/docs/Table/Table.where())
 class IndexName a where
   toForeign :: a -> Foreign
 
