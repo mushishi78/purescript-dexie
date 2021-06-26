@@ -1,6 +1,8 @@
 {
   "private": true,
   "scripts": {
+    "bump-version": "spago bump-version --no-dry-run",
+    "publish": "pulp publish",
     "bundle-tests": "spago -x test.dhall build && esbuild test/run.js --bundle --outfile=test/run.bundled.js",
     "serve-tests": "cd test && http-server"
   },
