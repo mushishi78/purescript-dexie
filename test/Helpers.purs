@@ -5,7 +5,7 @@ import Prelude
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)
 import Dexie as Dexie
-import Dexie.DB (DB)
+import Dexie.Data (DB)
 import Dexie.DB as DB
 import Dexie.Promise (Promise)
 import Dexie.Promise as Promise

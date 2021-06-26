@@ -1,5 +1,4 @@
 module Dexie.Table (
-    module DataRexports,
     OnCreatingArgs,
     OnDeletingArgs,
     OnUpdatingArgs,
@@ -39,13 +38,11 @@ import Prelude
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toNullable)
 import Data.Nullable as Nullable
-import Dexie.Collection (Collection)
 import Dexie.IndexName (class IndexName)
 import Dexie.IndexName as IndexName
 import Dexie.IndexedValue (class IndexedValue)
 import Dexie.IndexedValue as IndexedValue
-import Dexie.Internal.Data (Table) as DataRexports
-import Dexie.Internal.Data (Table, Transaction, WhereClause)
+import Dexie.Data (Collection, Table, Transaction, WhereClause)
 import Dexie.Promise (Promise)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)

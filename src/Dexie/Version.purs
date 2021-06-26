@@ -1,5 +1,4 @@
 module Dexie.Version (
-    Version,
     stores,
     stores_,
     upgrade,
@@ -9,15 +8,10 @@ module Dexie.Version (
 import Prelude
 
 import Dexie.Promise (Promise)
-import Dexie.Transaction (Transaction)
+import Dexie.Data (Transaction, Version)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Foreign.Object (Object)
-
--- | Used to define a migration to be run against a database
--- |
--- | Documentation: [dexie.org/docs/Version/Version](https://dexie.org/docs/Version/Version)
-foreign import data Version :: Type
 
 foreign import _stores :: Object String -> Version -> Effect Version
 foreign import _upgrade :: (Transaction -> Promise Unit) -> Version -> Effect Version

@@ -6,7 +6,7 @@ import Data.Maybe (Maybe(..))
 import Dexie.DB as DB
 import Dexie.IndexedValue (class IndexedValue)
 import Dexie.Promise (Promise, toAff)
-import Dexie.Table (Table)
+import Dexie.Data (Table)
 import Dexie.Table as Table
 import Dexie.Version as Version
 import Foreign (unsafeFromForeign)

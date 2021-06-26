@@ -39,9 +39,11 @@ import Effect.Exception (Error)
 -- | about closing transactions.
 -- |
 -- | Documentation: [dexie.org/docs/Promise/Promise](https://dexie.org/docs/Promise/Promise)
+-- | Methods: [Dexie.Promise](Dexie.Promise.html#m:Promise)
 foreign import data Promise :: Type -> Type
 
 -- | Represents a previously triggered Dexie Promise
+-- | See [Dexie.Promise](Dexie.Promise.html#m:Promise)
 foreign import data LaunchedPromise :: Type -> Type
 
 -- | Equivalent of `new Dexie.Promise((resolve, reject) => ...)`.

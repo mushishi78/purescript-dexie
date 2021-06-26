@@ -1,5 +1,4 @@
 module Dexie.WhereClause (
-    module DataRexports,
     above,
     aboveOrEqual,
     anyOf,
@@ -21,11 +20,9 @@ module Dexie.WhereClause (
 import Prelude
 
 import Data.Tuple (Tuple(..))
-import Dexie.Collection (Collection)
 import Dexie.IndexedValue (class IndexedValue)
 import Dexie.IndexedValue as IndexedValue
-import Dexie.Internal.Data (WhereClause)
-import Dexie.Internal.Data (WhereClause) as DataRexports
+import Dexie.Data (Collection, WhereClause)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Foreign (Foreign)

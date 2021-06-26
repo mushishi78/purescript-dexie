@@ -1,5 +1,4 @@
 module Dexie.DB (
-    DB,
     version,
     table,
     transaction,
@@ -14,18 +13,13 @@ module Dexie.DB (
 import Prelude
 
 import Data.Either (Either(..))
+import Dexie.Data (DB, Table, Transaction, Version)
 import Dexie.Promise (Promise)
-import Dexie.Table (Table)
-import Dexie.Transaction (Transaction)
-import Dexie.Version (Version)
 import Effect (Effect)
 import Effect.Aff (makeAff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Foreign (Foreign, unsafeFromForeign, unsafeToForeign)
-
--- | An instance represents an indexedDB database connection.
-foreign import data DB :: Type
 
 foreign import _version :: Int -> DB -> Effect Version
 foreign import _table :: String -> DB -> Effect Table

@@ -1,5 +1,4 @@
 module Dexie.Collection (
-    Collection,
     and,
     clone,
     count,
@@ -32,18 +31,11 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, toNullable)
-import Dexie.Internal.Data (WhereClause)
+import Dexie.Data (Collection, WhereClause)
 import Dexie.Promise (Promise)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Foreign (Foreign)
-
--- | Represents a collection of database objects.
--- | Note that it will not contain any objects by itself.
--- | Instead, it yields a preparation for how to execute a DB query.
--- |
--- | Documentation: [dexie.org/docs/Collection/Collection](https://dexie.org/docs/Collection/Collection)
-foreign import data Collection :: Type
 
 foreign import _and :: (Foreign -> Boolean) -> Collection -> Effect Collection
 foreign import _clone :: Collection -> Effect Collection

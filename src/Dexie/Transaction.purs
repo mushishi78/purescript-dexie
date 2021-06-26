@@ -1,9 +1,8 @@
-module Dexie.Transaction (module Dexie.Internal.Data, abort, table) where
+module Dexie.Transaction (abort, table) where
 
 import Prelude
 
-import Dexie.Internal.Data (Transaction)
-import Dexie.Table (Table)
+import Dexie.Data (Table, Transaction)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 

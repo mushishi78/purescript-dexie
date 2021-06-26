@@ -9,7 +9,7 @@ module Dexie (
 
 import Prelude
 
-import Dexie.DB (DB)
+import Dexie.Data (DB)
 import Dexie.Promise (Promise, toAff)
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff, liftAff)
