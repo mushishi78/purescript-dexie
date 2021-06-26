@@ -1,4 +1,21 @@
-module Dexie.Promise where
+module Dexie.Promise (
+  Promise,
+  LaunchedPromise,
+  new,
+  all,
+  allSettled,
+  any,
+  catch,
+  finally,
+  race,
+  reject,
+  resolve,
+  _then,
+  launch,
+  join,
+  toAff
+)
+where
 
 import Prelude
 
