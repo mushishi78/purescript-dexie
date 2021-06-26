@@ -31,19 +31,19 @@ foreign import _onReady :: Effect Unit -> DB -> Effect Unit
 foreign import _onVersionChange :: Effect Unit -> DB -> Effect Unit
 
 -- | Create a version definition for migrating the database schema.
--- | See [Dexie.Version](Dexie.Version.html#m:Version)
+-- | See [Dexie.Version](Dexie.Version#m:Version)
 -- |
 -- | Documentation: [dexie.org/docs/Dexie/Dexie.version()](https://dexie.org/docs/Dexie/Dexie.version())
 version :: forall me. MonadEffect me => Int -> DB -> me Version
 version versionNumber db = liftEffect $ _version versionNumber db
 
--- | Retrieve the `Table` for an object store. See [Dexie.Table](Dexie.Table.html#m:Table)
+-- | Retrieve the `Table` for an object store. See [Dexie.Table](Dexie.Table#m:Table)
 -- |
 -- | Documentation: [dexie.org/docs/Dexie/Dexie.table()](https://dexie.org/docs/Dexie/Dexie.table())
 table :: forall me. MonadEffect me => String -> DB -> me Table
 table storeName db = liftEffect $ _table storeName db
 
--- | Creates a database transaction. See [Dexie.Transaction](Dexie.Transaction.html#m:Transaction)
+-- | Creates a database transaction. See [Dexie.Transaction](Dexie.Transaction#m:Transaction)
 -- |
 -- | Documentation: [dexie.org/docs/Dexie/Dexie.transaction()](https://dexie.org/docs/Dexie/Dexie.transaction())
 transaction :: forall a. DB -> String -> Array String -> (Transaction -> Promise a) -> Promise a

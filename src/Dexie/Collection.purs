@@ -169,7 +169,7 @@ or index collection = liftEffect $ _or index collection
 primaryKeys :: Collection -> Promise (Array Foreign)
 primaryKeys collection = _primaryKeys collection
 
--- | Makes the resulting operation ignore any subscriber to [onReading](Dexie.Table.html#v:onReading).
+-- | Makes the resulting operation ignore any subscriber to [onReading](Dexie.Table#v:onReading).
 -- |
 -- | Documentation: [dexie.org/docs/Collection/Collection.raw()](https://dexie.org/docs/Collection/Collection.raw())
 raw :: forall me. MonadEffect me => Collection -> me Collection
@@ -182,7 +182,7 @@ reverse :: forall me. MonadEffect me => Collection -> me Collection
 reverse collection = liftEffect $ _reverse collection
 
 -- | Same as [toArray](#v:toArray) but with manual sorting applied to the array.
--- | Similar to [orderBy](Dexie.Table.html#v:orderBy) but does sorting
+-- | Similar to [orderBy](Dexie.Table#v:orderBy) but does sorting
 -- | on the resulting array rather than letting the backend implementation
 -- | do the sorting.
 -- |
