@@ -45,7 +45,7 @@ version versionNumber db = liftEffect $ _version versionNumber db
 table :: forall me. MonadEffect me => String -> DB -> me Table
 table storeName db = liftEffect $ _table storeName db
 
--- | Get the names of all the object stores in the database.
+-- | Retrieve all the `Table` instances for all the object stores. See [Dexie.Table](Dexie.Table#m:Table)
 -- |
 -- | Documentation: [dexie.org/docs/Dexie/Dexie.tables](https://dexie.org/docs/Dexie/Dexie.table)
 tables :: forall me. MonadEffect me => DB -> me (Array Table)
