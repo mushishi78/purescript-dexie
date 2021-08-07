@@ -7,23 +7,28 @@ module Dexie.Version
 
 import Prelude
 
-import Dexie.Promise (Promise)
+import Data.Maybe (Maybe)
+import Data.Nullable (Nullable, toNullable)
 import Dexie.Data (Transaction, Version)
+import Dexie.Promise (Promise)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
-import Foreign.Object (Object)
+import Foreign.Object (Object, fromHomogeneous)
+import Type.Row.Homogeneous (class Homogeneous)
 
-foreign import _stores :: Object String -> Version -> Effect Version
+foreign import _stores :: Object (Nullable String) -> Version -> Effect Version
 foreign import _upgrade :: (Transaction -> Promise Unit) -> Version -> Effect Version
 
 -- | Specify the database schema (object stores and indexes) for a certain version.
 -- |
 -- | Documentation: [dexie.org/docs/Version/Version.stores()](https://dexie.org/docs/Version/Version.stores())
-stores :: forall m. MonadEffect m => Object String -> Version -> m Version
-stores schemaDefinition versionInstance = liftEffect $ _stores schemaDefinition versionInstance
+stores :: forall m r. Homogeneous r (Maybe String) => MonadEffect m => Record r -> Version -> m Version
+stores schemaDefinition versionInstance = liftEffect $ _stores nullableSchemaDefinition versionInstance
+  where
+  nullableSchemaDefinition = map toNullable (fromHomogeneous schemaDefinition)
 
 -- | Version of [stores](#v:stores) without a return value.
-stores_ :: forall m. MonadEffect m => Object String -> Version -> m Unit
+stores_ :: forall m r. Homogeneous r (Maybe String) => MonadEffect m => Record r -> Version -> m Unit
 stores_ schemaDefinition versionInstance = void $ stores schemaDefinition versionInstance
 
 -- | Specify an upgrade function for upgrading between previous version to this one.

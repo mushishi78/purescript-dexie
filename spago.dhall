@@ -13,6 +13,7 @@
   , "psci-support"
   , "transformers"
   , "tuples"
+  , "typelevel-prelude"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs" ]

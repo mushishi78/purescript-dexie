@@ -4,13 +4,12 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Dexie.DB as DB
+import Dexie.Data (Table)
 import Dexie.IndexedValue (class IndexedValue)
 import Dexie.Promise (Promise, toAff)
-import Dexie.Data (Table)
 import Dexie.Table as Table
 import Dexie.Version as Version
 import Foreign (unsafeFromForeign)
-import Foreign.Object as Object
 import Test.Helpers (assertEqual, cleanUp, withDB)
 import Test.Unit (TestSuite, suite, test)
 
@@ -34,7 +33,7 @@ versionTests = suite "version" do
     -- Migrate from 1 -> 2
     withDB "db" $ \db -> toAff do
       DB.version 2 db
-        >>= Version.stores (Object.singleton "foo" "id")
+        >>= Version.stores { foo: Just "id" }
         >>= Version.upgrade_
           ( \_ -> do
               -- Add row to table
@@ -53,11 +52,11 @@ versionTests = suite "version" do
 
     -- Move off version 0
     withDB "db" $ \db -> toAff do
-      DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id" # Object.insert "bar" "++id")
+      DB.version 1 db >>= Version.stores_ { foo: Just "++id", bar: Just "++id" }
       DB.open db
 
     withDB "db" $ \db -> toAff do
-      DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id" # Object.insert "bar" "++id")
+      DB.version 1 db >>= Version.stores_ { foo: Just "++id", bar: Just "++id" }
 
       -- Migrate from 1 -> 2 slowly
       DB.version 2 db >>= Version.upgrade_
@@ -84,4 +83,3 @@ versionTests = suite "version" do
 
       -- Check that row 1 is John, not Harry
       assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet 1 =<< DB.table "foo" db
-

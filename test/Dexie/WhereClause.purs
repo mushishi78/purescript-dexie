@@ -11,7 +11,6 @@ import Dexie.Table as Table
 import Dexie.Version as Version
 import Dexie.WhereClause as WhereClause
 import Foreign (unsafeFromForeign)
-import Foreign.Object as Object
 import Test.Helpers (assertEqual, withCleanDB)
 import Test.Unit (TestSuite, suite, test)
 
@@ -22,7 +21,7 @@ whereClauseTests = suite "whereClause" do
     nothingString = Nothing
 
   test "can WhereClause.above" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -41,7 +40,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "John", "Janus" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.aboveOrEqual" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -60,7 +59,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Bing", "John", "Janus" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.anyOf" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -79,7 +78,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Juliet", "Charity", "Bing" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.anyOfIgnoreCase" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -100,7 +99,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Janus", "John", "Juliet" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.below" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -119,7 +118,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Juliet", "Charity" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.belowOrEqual" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -138,7 +137,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Juliet", "Charity", "Bing" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.between" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -171,7 +170,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Bing", "John", "Janus" ] $ map (unsafeFromForeign >>> getName) result3
 
   test "can WhereClause.equals" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -190,7 +189,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Bing", "Charity", "Juliet" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.equalsIgnoreCase" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -209,7 +208,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Janus" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.inAnyRange" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -248,7 +247,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Juliet", "Charity", "Bing", "Janus" ] $ map (unsafeFromForeign >>> getName) result3
 
   test "can WhereClause.noneOf" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -267,7 +266,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Charity", "Bing", "John" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.notEqual" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -286,7 +285,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Charity", "Bing", "John", "Janus" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.startsWith" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -305,7 +304,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Janus", "John", "Juliet" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.startsWithAnyOf" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -324,7 +323,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Bing", "Charity" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.startsWithIgnoreCase" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
@@ -343,7 +342,7 @@ whereClauseTests = suite "whereClause" do
     assertEqual [ "Janus", "John", "Juliet" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can WhereClause.startsWithAnyOfIgnoreCase" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name, age")
+    DB.version 1 db >>= Version.stores_ { foo: Just "name, age" }
     foo <- DB.table "foo" db
 
     -- Add some data
