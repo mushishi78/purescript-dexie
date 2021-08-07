@@ -1,6 +1,7 @@
 module Dexie.DB
   ( version
   , table
+  , tables
   , transaction
   , open
   , close
@@ -23,6 +24,7 @@ import Foreign (Foreign, unsafeFromForeign, unsafeToForeign)
 
 foreign import _version :: Int -> DB -> Effect Version
 foreign import _table :: String -> DB -> Effect Table
+foreign import _tables :: DB -> Effect (Array Table)
 foreign import _transaction :: DB -> String -> Array String -> (Transaction -> Promise Foreign) -> Promise Foreign
 foreign import _open :: DB -> Promise Unit
 foreign import _close :: DB -> Effect Unit
@@ -43,11 +45,17 @@ version versionNumber db = liftEffect $ _version versionNumber db
 table :: forall me. MonadEffect me => String -> DB -> me Table
 table storeName db = liftEffect $ _table storeName db
 
+-- | Get the names of all the object stores in the database.
+-- |
+-- | Documentation: [dexie.org/docs/Dexie/Dexie.tables](https://dexie.org/docs/Dexie/Dexie.table)
+tables :: forall me. MonadEffect me => DB -> me (Array Table)
+tables db = liftEffect $ _tables db
+
 -- | Creates a database transaction. See [Dexie.Transaction](Dexie.Transaction#m:Transaction)
 -- |
 -- | Documentation: [dexie.org/docs/Dexie/Dexie.transaction()](https://dexie.org/docs/Dexie/Dexie.transaction())
 transaction :: forall a. DB -> String -> Array String -> (Transaction -> Promise a) -> Promise a
-transaction db mode tables callback = map unsafeFromForeign $ _transaction db mode tables cb
+transaction db mode ts callback = map unsafeFromForeign $ _transaction db mode ts cb
   where
   cb trnx = map unsafeToForeign $ callback trnx
 

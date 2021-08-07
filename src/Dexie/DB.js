@@ -14,6 +14,12 @@ exports._table = function (storeName) {
   }
 }
 
+exports._tables = function (db) {
+  return function () {
+    return db.tables
+  }
+}
+
 exports._transaction = function (db) {
   return function (mode) {
     return function (tables) {

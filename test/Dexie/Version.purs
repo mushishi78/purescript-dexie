@@ -3,6 +3,7 @@ module Test.Dexie.Version where
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import Data.Traversable (traverse)
 import Dexie.DB as DB
 import Dexie.Data (Table)
 import Dexie.IndexedValue (class IndexedValue)
@@ -83,3 +84,25 @@ versionTests = suite "version" do
 
       -- Check that row 1 is John, not Harry
       assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet 1 =<< DB.table "foo" db
+
+  test "can remove a table" do
+    cleanUp
+
+    -- Can create a table
+    withDB "db" $ \db -> toAff do
+      DB.version 1 db
+        >>= Version.stores_ { foo: Just "id" }
+      DB.open db
+
+      assertEqual [ "foo" ] =<< traverse Table.name =<< DB.tables db
+
+    -- Can remove a table
+    withDB "db" $ \db -> toAff do
+      DB.version 1 db
+        >>= Version.stores_ { foo: Just "id" }
+
+      DB.version 2 db
+        >>= Version.stores_ { foo: Nothing }
+      DB.open db
+
+      assertEqual [] =<< traverse Table.name =<< DB.tables db
