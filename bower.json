@@ -26,6 +26,7 @@
         "purescript-prelude": "^v5.0.0",
         "purescript-psci-support": "^v5.0.0",
         "purescript-transformers": "^v5.1.0",
-        "purescript-tuples": "^v6.0.1"
+        "purescript-tuples": "^v6.0.1",
+        "purescript-typelevel-prelude": "^v6.0.0"
     }
 }
