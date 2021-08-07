@@ -1,9 +1,9 @@
-module Dexie.Version (
-    stores,
-    stores_,
-    upgrade,
-    upgrade_
-) where
+module Dexie.Version
+  ( stores
+  , stores_
+  , upgrade
+  , upgrade_
+  ) where
 
 import Prelude
 

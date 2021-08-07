@@ -35,10 +35,11 @@ versionTests = suite "version" do
     withDB "db" $ \db -> toAff do
       DB.version 2 db
         >>= Version.stores (Object.singleton "foo" "id")
-        >>= Version.upgrade_ (\_ -> do
-          -- Add row to table
-          Table.add_ { id: 1, name: "John" } nothingInt =<< DB.table "foo" db
-        )
+        >>= Version.upgrade_
+          ( \_ -> do
+              -- Add row to table
+              Table.add_ { id: 1, name: "John" } nothingInt =<< DB.table "foo" db
+          )
 
       DB.open db
 
@@ -59,23 +60,25 @@ versionTests = suite "version" do
       DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id" # Object.insert "bar" "++id")
 
       -- Migrate from 1 -> 2 slowly
-      DB.version 2 db >>= Version.upgrade_ (\_ -> do
-        -- Waste some time inserting into a different table
-        bar <- DB.table "bar" db
-        Table.add_ {} nothingInt bar
-        Table.add_ {} nothingInt bar
-        Table.add_ {} nothingInt bar
-        Table.add_ {} nothingInt bar
+      DB.version 2 db >>= Version.upgrade_
+        ( \_ -> do
+            -- Waste some time inserting into a different table
+            bar <- DB.table "bar" db
+            Table.add_ {} nothingInt bar
+            Table.add_ {} nothingInt bar
+            Table.add_ {} nothingInt bar
+            Table.add_ {} nothingInt bar
 
-        -- Add row to foo table
-        Table.add_ { name: "John" } nothingInt =<< DB.table "foo" db
-      )
+            -- Add row to foo table
+            Table.add_ { name: "John" } nothingInt =<< DB.table "foo" db
+        )
 
       -- Migrate from 2 -> 3 quicker
-      DB.version 3 db >>= Version.upgrade_ (\_ -> do
-        -- Add another row to foo table
-        Table.add_ { name: "Harry" } nothingInt =<< DB.table "foo" db
-      )
+      DB.version 3 db >>= Version.upgrade_
+        ( \_ -> do
+            -- Add another row to foo table
+            Table.add_ { name: "Harry" } nothingInt =<< DB.table "foo" db
+        )
 
       DB.open db
 

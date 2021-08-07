@@ -24,7 +24,7 @@ transactionTests = suite "transaction" do
   test "can rollback transaction" $ withCleanDB "db" $ \db -> Promise.toAff $ do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
 
-    void $ try $ DB.transaction db "rw" ["foo"] \trnx -> do
+    void $ try $ DB.transaction db "rw" [ "foo" ] \trnx -> do
       table <- Transaction.table "foo" trnx
       Table.add_ { id: 1, name: "John" } nothingInt table
       liftEffect $ throwException (error "somethings wrong") # void
@@ -61,7 +61,7 @@ transactionTests = suite "transaction" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
 
     -- Start writing to foo in transaction but don't wait
-    void $ Promise.launch $ DB.transaction db "rw" ["foo"] \trnx -> do
+    void $ Promise.launch $ DB.transaction db "rw" [ "foo" ] \trnx -> do
       foo <- Transaction.table "foo" trnx
       Table.add_ "One" nothingInt foo
       Table.add_ "Two" nothingInt foo

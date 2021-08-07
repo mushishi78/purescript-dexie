@@ -1,14 +1,14 @@
-module Dexie.DB (
-    version,
-    table,
-    transaction,
-    open,
-    close,
-    onBlocked,
-    onReady,
-    onVersionChange,
-    waitUntilReady
-) where
+module Dexie.DB
+  ( version
+  , table
+  , transaction
+  , open
+  , close
+  , onBlocked
+  , onReady
+  , onVersionChange
+  , waitUntilReady
+  ) where
 
 import Prelude
 
@@ -49,7 +49,7 @@ table storeName db = liftEffect $ _table storeName db
 transaction :: forall a. DB -> String -> Array String -> (Transaction -> Promise a) -> Promise a
 transaction db mode tables callback = map unsafeFromForeign $ _transaction db mode tables cb
   where
-    cb trnx = map unsafeToForeign $ callback trnx
+  cb trnx = map unsafeToForeign $ callback trnx
 
 -- | Opens the database connection. By default, db.open() will be called
 -- | automatically on first query to the db.

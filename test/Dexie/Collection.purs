@@ -35,21 +35,21 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     -- Use Collection.and as a filter
     result <- Table.toCollection foo
-        >>= Collection.and (unsafeFromForeign >>> String.length >>> (_ > 5))
-        >>= Collection.toArray
+      >>= Collection.and (unsafeFromForeign >>> String.length >>> (_ > 5))
+      >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Aticus", "Helena"] $ map unsafeFromForeign result
+    assertEqual [ "Aticus", "Helena" ] $ map unsafeFromForeign result
 
   test "can Collection.clone" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     -- Create a collection and a clone
     originalCollection <- Table.reverse foo
@@ -66,15 +66,15 @@ collectionTests = suite "collection" do
     result3 <- Collection.offset 1 originalCollection >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Helena", "Aticus"] $ map unsafeFromForeign result1
-    assertEqual ["Aticus"] $ map unsafeFromForeign result2
-    assertEqual ["Aticus", "Jason"] $ map unsafeFromForeign result3
+    assertEqual [ "Helena", "Aticus" ] $ map unsafeFromForeign result1
+    assertEqual [ "Aticus" ] $ map unsafeFromForeign result2
+    assertEqual [ "Aticus", "Jason" ] $ map unsafeFromForeign result3
 
   test "can Collection.count" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     count <- Table.toCollection foo >>= Collection.count
 
@@ -84,21 +84,21 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     count <- Table.limit 2 foo >>= Collection.delete
 
     assertEqual 2 count
     assertEqual 1 =<< Table.count foo
-    assertEqual ["Helena"] =<< map (map unsafeFromForeign) (Table.toArray foo)
+    assertEqual [ "Helena" ] =<< map (map unsafeFromForeign) (Table.toArray foo)
 
   test "can Collection.distinct" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id, *emails")
     foo <- DB.table "foo" db
 
-    Table.add_ { name: "Jason", emails: ["jason99@example.com", "jason_experience@example.com"] } nothingInt foo
-    Table.add_ { name: "Aticus", emails: ["atic8@example.com"] } nothingInt foo
-    Table.add_ { name: "Helena", emails: ["hell_angel@example.com"] } nothingInt foo
+    Table.add_ { name: "Jason", emails: [ "jason99@example.com", "jason_experience@example.com" ] } nothingInt foo
+    Table.add_ { name: "Aticus", emails: [ "atic8@example.com" ] } nothingInt foo
+    Table.add_ { name: "Helena", emails: [ "hell_angel@example.com" ] } nothingInt foo
 
     -- Create a collection with duplicates
     collection <- Table.whereClause "emails" foo >>= WhereClause.startsWith "jason"
@@ -110,8 +110,8 @@ collectionTests = suite "collection" do
     result2 <- Collection.distinct collection >>= Collection.primaryKeys
 
     -- Check it equals what we'd expect
-    assertEqual [1, 1] $ map unsafeFromForeign result1
-    assertEqual [1] $ map unsafeFromForeign result2
+    assertEqual [ 1, 1 ] $ map unsafeFromForeign result1
+    assertEqual [ 1 ] $ map unsafeFromForeign result2
 
   test "can Collection.each" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
@@ -119,7 +119,7 @@ collectionTests = suite "collection" do
     ref <- liftEffect $ Ref.new ""
 
     -- Add some rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane", "Chelsea", "Emily" ] nothingIntArray foo
 
     -- Iterate over rows and add first character to ref
     Table.toCollection foo >>= Collection.each (unsafeFromForeign >>> addFirstCharToRef ref)
@@ -181,21 +181,21 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     -- Use Collection.filter
     result <- Table.toCollection foo
-        >>= Collection.filter (unsafeFromForeign >>> String.length >>> (_ > 5))
-        >>= Collection.toArray
+      >>= Collection.filter (unsafeFromForeign >>> String.length >>> (_ > 5))
+      >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Aticus", "Helena"] $ map unsafeFromForeign result
+    assertEqual [ "Aticus", "Helena" ] $ map unsafeFromForeign result
 
   test "can Collection.first" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     -- Use Collection.first
     result <- Table.toCollection foo >>= Collection.first
@@ -218,13 +218,13 @@ collectionTests = suite "collection" do
     result <- Table.orderBy "lastName" foo >>= Collection.keys
 
     -- Check it equals what we'd expect
-    assertEqual [ "Barrow", "Herron", "Stathem", "Street", "Troy"] $ map unsafeFromForeign result
+    assertEqual [ "Barrow", "Herron", "Stathem", "Street", "Troy" ] $ map unsafeFromForeign result
 
   test "can Collection.last" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     -- Use Collection.last
     result <- Table.toCollection foo >>= Collection.last
@@ -236,54 +236,55 @@ collectionTests = suite "collection" do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     -- Use Collection.limit
     result <- Table.toCollection foo >>= Collection.limit 2 >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Jason", "Aticus"] $ map unsafeFromForeign result
+    assertEqual [ "Jason", "Aticus" ] $ map unsafeFromForeign result
 
   test "can Collection.modify with record" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd [{}, {}] nothingIntArray foo
+    _ <- Table.bulkAdd [ {}, {} ] nothingIntArray foo
 
     -- Use Collection.modify to add boolean flag
     _ <- Table.toCollection foo >>= Collection.modify (unsafeToForeign { old: true })
 
     -- Check it equals what we'd expect
-    assertEqual [{ id: 1, old: true }, { id: 2, old: true }] =<< map (map unsafeFromForeign) (Table.toArray foo)
+    assertEqual [ { id: 1, old: true }, { id: 2, old: true } ] =<< map (map unsafeFromForeign) (Table.toArray foo)
 
   test "can Collection.modifyFn" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++id")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd [{ old: false }, { old: false }, { old: false }] nothingIntArray foo
+    _ <- Table.bulkAdd [ { old: false }, { old: false }, { old: false } ] nothingIntArray foo
 
     -- Use Collection.modifyFn
-    _ <- Table.toCollection foo >>= Collection.modifyFn (unsafeFromForeign >>> \item ->
-        case item.id of
-          1 -> ModifyDelete
-          2 -> ModifyReplace $ item { old = true }
-          _ -> ModifyIgnore
+    _ <- Table.toCollection foo >>= Collection.modifyFn
+      ( unsafeFromForeign >>> \item ->
+          case item.id of
+            1 -> ModifyDelete
+            2 -> ModifyReplace $ item { old = true }
+            _ -> ModifyIgnore
       )
 
     -- Check it equals what we'd expect
-    assertEqual [{ id: 2, old: true }, { id: 3, old: false }] =<< map (map unsafeFromForeign) (Table.toArray foo)
+    assertEqual [ { id: 2, old: true }, { id: 3, old: false } ] =<< map (map unsafeFromForeign) (Table.toArray foo)
 
   test "can Collection.offset" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     -- Use Collection.offset
     result <- Table.toCollection foo >>= Collection.offset 1 >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Aticus", "Helena"] $ map unsafeFromForeign result
+    assertEqual [ "Aticus", "Helena" ] $ map unsafeFromForeign result
 
   test "can Collection.or" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name")
@@ -296,13 +297,13 @@ collectionTests = suite "collection" do
     -- Use two where queries using Collection.or
     result <-
       Table.whereClause "name" foo
-      >>= WhereClause.startsWith "J"
-      >>= Collection.or "name"
-      >>= WhereClause.startsWith "A"
-      >>= Collection.toArray
+        >>= WhereClause.startsWith "J"
+        >>= Collection.or "name"
+        >>= WhereClause.startsWith "A"
+        >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual [{ name: "Jason" }, { name: "Aticus" }] $ map unsafeFromForeign result
+    assertEqual [ { name: "Jason" }, { name: "Aticus" } ] $ map unsafeFromForeign result
 
   test "can Collection.primaryKeys" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, firstName, lastName")
@@ -319,7 +320,7 @@ collectionTests = suite "collection" do
     result <- Table.orderBy "lastName" foo >>= Collection.primaryKeys
 
     -- Check it equals what we'd expect
-    assertEqual [ 3, 1, 4, 2, 5] $ map unsafeFromForeign result
+    assertEqual [ 3, 1, 4, 2, 5 ] $ map unsafeFromForeign result
 
   test "can bypass onReading with Collection.raw" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
@@ -336,20 +337,20 @@ collectionTests = suite "collection" do
     result2 <- Table.toCollection foo >>= Collection.raw >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Sir John"] $ map unsafeFromForeign result1
-    assertEqual ["John"] $ map unsafeFromForeign result2
+    assertEqual [ "Sir John" ] $ map unsafeFromForeign result1
+    assertEqual [ "John" ] $ map unsafeFromForeign result2
 
   test "can Collection.reverse" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
-    _ <- Table.bulkAdd ["Jason", "Aticus", "Helena"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
 
     -- Use Collection.reverse
     result <- Table.toCollection foo >>= Collection.reverse >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Helena", "Aticus", "Jason"] $ map unsafeFromForeign result
+    assertEqual [ "Helena", "Aticus", "Jason" ] $ map unsafeFromForeign result
 
   test "can Collection.sortBy" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "name,age")
@@ -366,7 +367,7 @@ collectionTests = suite "collection" do
     let getName r = r.name
 
     -- Check it equals what we'd expect
-    assertEqual ["Helena", "Jason", "Aticus"] $ map (unsafeFromForeign >>> getName) result
+    assertEqual [ "Helena", "Jason", "Aticus" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can Collection.uniqueKeys" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, firstName")
@@ -383,7 +384,7 @@ collectionTests = suite "collection" do
     result <- Table.orderBy "firstName" foo >>= Collection.uniqueKeys
 
     -- Check it equals what we'd expect
-    assertEqual ["Aticus", "Helena", "Jason"] $ map unsafeFromForeign result
+    assertEqual [ "Aticus", "Helena", "Jason" ] $ map unsafeFromForeign result
 
   test "can Collection.until" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++,age")
@@ -408,5 +409,5 @@ collectionTests = suite "collection" do
     let getName r = r.name
 
     -- Check it equals what we'd expect
-    assertEqual ["Jason", "Aticus"] $ map (unsafeFromForeign >>> getName) result1
-    assertEqual ["Jason", "Aticus", "Helena"] $ map (unsafeFromForeign >>> getName) result2
+    assertEqual [ "Jason", "Aticus" ] $ map (unsafeFromForeign >>> getName) result1
+    assertEqual [ "Jason", "Aticus", "Helena" ] $ map (unsafeFromForeign >>> getName) result2

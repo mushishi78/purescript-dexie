@@ -4,7 +4,8 @@
     "bump-version": "spago bump-version --no-dry-run",
     "publish": "pulp publish",
     "bundle-tests": "spago -x test.dhall build && esbuild test/run.js --bundle --outfile=test/run.bundled.js",
-    "serve-tests": "cd test && http-server"
+    "serve-tests": "cd test && http-server",
+    "tidy": "purs-tidy format-in-place \"src/**/*.purs\" \"test/**/*.purs\""
   },
   "devDependencies": {
     "bower": "^1.8.12",
@@ -12,6 +13,7 @@
     "esbuild": "^0.11.20",
     "http-server": "^0.12.3",
     "prettier": "^2.3.0",
-    "pulp": "^15.0.0"
+    "pulp": "^15.0.0",
+    "purs-tidy": "^0.1.0"
   }
 }

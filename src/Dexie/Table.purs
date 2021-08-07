@@ -1,37 +1,37 @@
-module Dexie.Table (
-    OnCreatingArgs,
-    OnDeletingArgs,
-    OnUpdatingArgs,
-    add,
-    bulkAdd,
-    bulkDelete,
-    bulkGet,
-    bulkPut,
-    clear,
-    count,
-    delete,
-    each,
-    filter,
-    get,
-    onCreating,
-    onDeleting,
-    onReading,
-    onUpdating,
-    limit,
-    name,
-    offset,
-    orderBy,
-    put,
-    reverse,
-    toArray,
-    toCollection,
-    update,
-    whereClause,
-    whereValues,
-    add_,
-    put_,
-    update_
-) where
+module Dexie.Table
+  ( OnCreatingArgs
+  , OnDeletingArgs
+  , OnUpdatingArgs
+  , add
+  , bulkAdd
+  , bulkDelete
+  , bulkGet
+  , bulkPut
+  , clear
+  , count
+  , delete
+  , each
+  , filter
+  , get
+  , onCreating
+  , onDeleting
+  , onReading
+  , onUpdating
+  , limit
+  , name
+  , offset
+  , orderBy
+  , put
+  , reverse
+  , toArray
+  , toCollection
+  , update
+  , whereClause
+  , whereValues
+  , add_
+  , put_
+  , update_
+  ) where
 
 import Prelude
 
@@ -51,31 +51,31 @@ import Foreign (Foreign, unsafeToForeign)
 
 -- | First argument given to callback with [onCreating](#v:onCreating).
 type OnCreatingArgs =
-    { primaryKey :: Nullable Foreign
-    , item :: Foreign
-    , transaction :: Transaction
-    , setOnSuccess :: (Foreign -> Effect Unit) -> Effect Unit
-    , setOnError :: (Error -> Effect Unit) -> Effect Unit
-    }
+  { primaryKey :: Nullable Foreign
+  , item :: Foreign
+  , transaction :: Transaction
+  , setOnSuccess :: (Foreign -> Effect Unit) -> Effect Unit
+  , setOnError :: (Error -> Effect Unit) -> Effect Unit
+  }
 
 -- | First argument given to callback with [onDeleting](#v:onDeleting).
 type OnDeletingArgs =
-    { primaryKey :: Foreign
-    , item :: Foreign
-    , transaction :: Transaction
-    , setOnSuccess :: Effect Unit -> Effect Unit
-    , setOnError :: (Error -> Effect Unit)-> Effect Unit
-    }
+  { primaryKey :: Foreign
+  , item :: Foreign
+  , transaction :: Transaction
+  , setOnSuccess :: Effect Unit -> Effect Unit
+  , setOnError :: (Error -> Effect Unit) -> Effect Unit
+  }
 
 -- | First argument given to callback with [onUpdating](#v:onUpdating).
 type OnUpdatingArgs =
-    { modifications :: Foreign
-    , primaryKey :: Foreign
-    , item :: Foreign
-    , transaction :: Transaction
-    , setOnSuccess :: (Foreign -> Effect Unit) -> Effect Unit
-    , setOnError :: (Error -> Effect Unit) -> Effect Unit
-    }
+  { modifications :: Foreign
+  , primaryKey :: Foreign
+  , item :: Foreign
+  , transaction :: Transaction
+  , setOnSuccess :: (Foreign -> Effect Unit) -> Effect Unit
+  , setOnError :: (Error -> Effect Unit) -> Effect Unit
+  }
 
 foreign import _add :: Foreign -> Nullable Foreign -> Table -> Promise Foreign
 foreign import _bulkAdd :: Array Foreign -> Nullable (Array Foreign) -> Table -> Promise (Array Foreign)
@@ -108,15 +108,15 @@ foreign import _whereValues :: Foreign -> Table -> Effect Collection
 add :: forall item key. IndexedValue key => item -> Maybe key -> Table -> Promise Foreign
 add item maybeKey table = _add foreignItem foreignKey table
   where
-    foreignItem = unsafeToForeign item
-    foreignKey = toNullable $ map IndexedValue.toForeign maybeKey
+  foreignItem = unsafeToForeign item
+  foreignKey = toNullable $ map IndexedValue.toForeign maybeKey
 
 -- | Documentation: [dexie.org/docs/Table/Table.bulkAdd()](https://dexie.org/docs/Table/Table.bulkAdd())
 bulkAdd :: forall item key. IndexedValue key => Array item -> Maybe (Array key) -> Table -> Promise (Array Foreign)
 bulkAdd items maybeKeys table = _bulkAdd foreignItems foreignKeys table
   where
-    foreignItems = map unsafeToForeign items
-    foreignKeys = toNullable $ map (map IndexedValue.toForeign) maybeKeys
+  foreignItems = map unsafeToForeign items
+  foreignKeys = toNullable $ map (map IndexedValue.toForeign) maybeKeys
 
 -- | Documentation: [dexie.org/docs/Table/Table.bulkDelete()](https://dexie.org/docs/Table/Table.bulkDelete())
 bulkDelete :: forall key. IndexedValue key => Array key -> Table -> Promise Unit
@@ -126,14 +126,14 @@ bulkDelete keys table = _bulkDelete (map IndexedValue.toForeign keys) table
 bulkGet :: forall key. IndexedValue key => Array key -> Table -> Promise (Array (Maybe Foreign))
 bulkGet keys table = map (map Nullable.toMaybe) $ _bulkGet foreignKeys table
   where
-    foreignKeys = map IndexedValue.toForeign keys
+  foreignKeys = map IndexedValue.toForeign keys
 
 -- | Documentation: [dexie.org/docs/Table/Table.bulkPut()](https://dexie.org/docs/Table/Table.bulkPut())
 bulkPut :: forall item key. IndexedValue key => Array item -> Maybe (Array key) -> Table -> Promise (Array Foreign)
 bulkPut items maybeKeys table = _bulkPut foreignItems foreignKeys table
   where
-    foreignItems = map unsafeToForeign items
-    foreignKeys = toNullable $ map (map IndexedValue.toForeign) maybeKeys
+  foreignItems = map unsafeToForeign items
+  foreignKeys = toNullable $ map (map IndexedValue.toForeign) maybeKeys
 
 -- | Documentation: [dexie.org/docs/Table/Table.clear()](https://dexie.org/docs/Table/Table.clear())
 clear :: Table -> Promise Unit
@@ -163,7 +163,7 @@ get key table = map Nullable.toMaybe $ _get (IndexedValue.toForeign key) table
 onCreating :: forall me key. IndexedValue key => MonadEffect me => (OnCreatingArgs -> Effect (Maybe key)) -> Table -> me (Effect Unit)
 onCreating callback table = liftEffect $ _onCreating nullableForeignCallback table
   where
-    nullableForeignCallback args = map toNullable $ map (map IndexedValue.toForeign) $ callback args
+  nullableForeignCallback args = map toNullable $ map (map IndexedValue.toForeign) $ callback args
 
 -- | Documentation: [dexie.org/docs/Table/Table.hook('deleting')](https://dexie.org/docs/Table/Table.hook('deleting'))
 onDeleting :: forall me. MonadEffect me => (OnDeletingArgs -> Effect Unit) -> Table -> me (Effect Unit)
@@ -173,13 +173,13 @@ onDeleting callback table = liftEffect $ _onDeleting callback table
 onReading :: forall me item. MonadEffect me => (Foreign -> Effect item) -> Table -> me (Effect Unit)
 onReading callback table = liftEffect $ _onReading foreignCallback table
   where
-    foreignCallback args = map unsafeToForeign $ callback args
+  foreignCallback args = map unsafeToForeign $ callback args
 
 -- | Documentation: [dexie.org/docs/Table/Table.hook('updating')](https://dexie.org/docs/Table/Table.hook('updating'))
 onUpdating :: forall me item. MonadEffect me => (OnUpdatingArgs -> Effect (Maybe item)) -> Table -> me (Effect Unit)
 onUpdating callback table = liftEffect $ _onUpdating nullableForeignCallback table
   where
-    nullableForeignCallback args = map toNullable $ map (map unsafeToForeign) $ callback args
+  nullableForeignCallback args = map toNullable $ map (map unsafeToForeign) $ callback args
 
 -- | Documentation: [dexie.org/docs/Table/Table.limit()](https://dexie.org/docs/Table/Table.limit())
 limit :: forall me. MonadEffect me => Int -> Table -> me Collection
@@ -201,8 +201,8 @@ orderBy index table = liftEffect $ _orderBy index table
 put :: forall item key. IndexedValue key => item -> Maybe key -> Table -> Promise Foreign
 put item maybeKey table = _put foreignItem foreignKey table
   where
-    foreignItem = unsafeToForeign item
-    foreignKey = toNullable $ map IndexedValue.toForeign maybeKey
+  foreignItem = unsafeToForeign item
+  foreignKey = toNullable $ map IndexedValue.toForeign maybeKey
 
 -- | Documentation: [dexie.org/docs/Table/Table.reverse()](https://dexie.org/docs/Table/Table.reverse())
 reverse :: forall me. MonadEffect me => Table -> me Collection

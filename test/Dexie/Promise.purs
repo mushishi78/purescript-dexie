@@ -1,6 +1,5 @@
 module Test.Dexie.Promise where
 
-
 import Prelude
 
 import Dexie.Promise (reject, resolve)

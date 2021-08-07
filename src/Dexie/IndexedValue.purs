@@ -41,10 +41,10 @@ instance indexedValueArray :: IndexedValue v => IndexedValue (Array v) where
   toForeign = map toForeign >>> unsafeToForeign
 
 instance indexedValueIntTuple :: IndexedValue v => IndexedValue (Tuple Int v) where
-  toForeign (Tuple a b) = unsafeToForeign [toForeign a, toForeign b]
+  toForeign (Tuple a b) = unsafeToForeign [ toForeign a, toForeign b ]
 
 instance indexedValueStringTuple :: IndexedValue v => IndexedValue (Tuple String v) where
-  toForeign (Tuple a b) = unsafeToForeign [toForeign a, toForeign b]
+  toForeign (Tuple a b) = unsafeToForeign [ toForeign a, toForeign b ]
 
 instance indexedValueNumberTuple :: IndexedValue v => IndexedValue (Tuple Number v) where
-  toForeign (Tuple a b) = unsafeToForeign [toForeign a, toForeign b]
+  toForeign (Tuple a b) = unsafeToForeign [ toForeign a, toForeign b ]

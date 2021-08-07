@@ -92,57 +92,57 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    keys <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
+    keys <- Table.bulkAdd [ "John", "Harry", "Jane" ] nothingIntArray foo
 
     -- Check it equals what we'd expect
-    assertEqual [1, 2, 3] (map unsafeFromForeign keys)
-    assertEqual ["John", "Harry", "Jane"] =<< unsafeToArray foo
+    assertEqual [ 1, 2, 3 ] (map unsafeFromForeign keys)
+    assertEqual [ "John", "Harry", "Jane" ] =<< unsafeToArray foo
 
   test "can Table.bulkDelete" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane" ] nothingIntArray foo
 
     -- And delete some of them
-    Table.bulkDelete [1, 3] foo
+    Table.bulkDelete [ 1, 3 ] foo
 
     -- Check it equals what we'd expect
-    assertEqual ["Harry"] =<< unsafeToArray foo
+    assertEqual [ "Harry" ] =<< unsafeToArray foo
 
   test "can Table.bulkGet" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane" ] nothingIntArray foo
 
     -- And read specific ones
-    values <- Table.bulkGet [1, 3, 25] foo
+    values <- Table.bulkGet [ 1, 3, 25 ] foo
 
     -- Check it equals what we'd expect
-    assertEqual [Just "John", Just "Jane", Nothing] $ map (map unsafeFromForeign) values
+    assertEqual [ Just "John", Just "Jane", Nothing ] $ map (map unsafeFromForeign) values
 
   test "can Table.bulkPut" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane" ] nothingIntArray foo
 
     -- And put specific ones
-    _ <- Table.bulkPut ["Lizzie", "Chelsea", "Eve"] (Just [1, 3, 25]) foo
+    _ <- Table.bulkPut [ "Lizzie", "Chelsea", "Eve" ] (Just [ 1, 3, 25 ]) foo
 
     -- Check it equals what we'd expect
-    assertEqual ["Lizzie", "Harry", "Chelsea", "Eve"] =<< unsafeToArray foo
+    assertEqual [ "Lizzie", "Harry", "Chelsea", "Eve" ] =<< unsafeToArray foo
 
   test "can Table.clear" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane" ] nothingIntArray foo
 
     -- Check that they're there
     assertEqual 3 =<< Table.count foo
@@ -158,13 +158,13 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane" ] nothingIntArray foo
 
     -- And delete some of them
     Table.delete 1 foo
 
     -- Check it equals what we'd expect
-    assertEqual ["Harry", "Jane"] =<< unsafeToArray foo
+    assertEqual [ "Harry", "Jane" ] =<< unsafeToArray foo
 
   test "can Table.each" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
@@ -172,12 +172,12 @@ tableTests = suite "table" do
     ref <- liftEffect $ Ref.new ""
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane" ] nothingIntArray foo
 
     -- And iterate over them
-    (flip Table.each) foo $ \item -> do
+    flip Table.each foo $ \item -> do
       -- Concatenate the items together in the ref
-      liftEffect $ (flip Ref.modify_) ref $ \s -> s <> unsafeFromForeign item
+      liftEffect $ flip Ref.modify_ ref $ \s -> s <> unsafeFromForeign item
 
     -- Check it equals what we'd expect
     assertEqual "JohnHarryJane" =<< liftEffect (Ref.read ref)
@@ -187,13 +187,13 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane" ] nothingIntArray foo
 
     -- Filter the table with a predicate
     values <- Table.filter (\item -> startsWith "J" (unsafeFromForeign item)) foo >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["John", "Jane"] $ map unsafeFromForeign values
+    assertEqual [ "John", "Jane" ] $ map unsafeFromForeign values
 
   test "can set onCreating callback" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
@@ -346,7 +346,7 @@ tableTests = suite "table" do
 
     -- Try to add to a row
     Table.add_ "John" nothingInt foo
-    maybeError <- try $ Table.delete  1 foo
+    maybeError <- try $ Table.delete 1 foo
 
     -- Check that the result of the add is an error
     assertEqual (Left "dont like this") $ lmap Error.message maybeError
@@ -458,13 +458,13 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane", "Chelsea", "Emily" ] nothingIntArray foo
 
     -- Can read a limited number of rows
     result <- Table.limit 3 foo >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["John", "Harry", "Jane"] $ map unsafeFromForeign result
+    assertEqual [ "John", "Harry", "Jane" ] $ map unsafeFromForeign result
 
   test "can Table.name" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
@@ -478,13 +478,13 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane", "Chelsea", "Emily" ] nothingIntArray foo
 
     -- Can skip a number of rows
     result <- Table.offset 2 foo >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Jane", "Chelsea", "Emily"] $ map unsafeFromForeign result
+    assertEqual [ "Jane", "Chelsea", "Emily" ] $ map unsafeFromForeign result
 
   test "can Table.orderBy" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++, name")
@@ -502,7 +502,7 @@ tableTests = suite "table" do
     let getName record = record.name
 
     -- Check it equals what we'd expect
-    assertEqual ["Chelsea", "Harry", "Jane", "John"] $ map (unsafeFromForeign >>> getName) result
+    assertEqual [ "Chelsea", "Harry", "Jane", "John" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can Table.put to a new row" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
@@ -537,39 +537,39 @@ tableTests = suite "table" do
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane", "Chelsea", "Emily" ] nothingIntArray foo
 
     -- Can read in reverse order
     result <- Table.reverse foo >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["Emily", "Chelsea", "Jane", "Harry", "John"] $ map unsafeFromForeign result
+    assertEqual [ "Emily", "Chelsea", "Jane", "Harry", "John" ] $ map unsafeFromForeign result
 
   test "can Table.toArray" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane", "Chelsea", "Emily" ] nothingIntArray foo
 
     -- Can read in all the rows
     result <- Table.toArray foo
 
     -- Check it equals what we'd expect
-    assertEqual ["John", "Harry", "Jane", "Chelsea", "Emily"] $ map unsafeFromForeign result
+    assertEqual [ "John", "Harry", "Jane", "Chelsea", "Emily" ] $ map unsafeFromForeign result
 
   test "can Table.toCollection" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "++")
     foo <- DB.table "foo" db
 
     -- Add multiple rows
-    _ <- Table.bulkAdd ["John", "Harry", "Jane", "Chelsea", "Emily"] nothingIntArray foo
+    _ <- Table.bulkAdd [ "John", "Harry", "Jane", "Chelsea", "Emily" ] nothingIntArray foo
 
     -- Can convert to a collection
     result <- Table.toCollection foo >>= Collection.toArray
 
     -- Check it equals what we'd expect
-    assertEqual ["John", "Harry", "Jane", "Chelsea", "Emily"] $ map unsafeFromForeign result
+    assertEqual [ "John", "Harry", "Jane", "Chelsea", "Emily" ] $ map unsafeFromForeign result
 
   test "can Table.update an existing row" $ withCleanDB "db" $ \db -> toAff do
     DB.version 1 db >>= Version.stores_ (Object.singleton "foo" "id")
@@ -612,4 +612,4 @@ tableTests = suite "table" do
     let getName record = record.name
 
     -- Check it equals what we'd expect
-    assertEqual ["John", "Jane"] $ map (unsafeFromForeign >>> getName) result
+    assertEqual [ "John", "Jane" ] $ map (unsafeFromForeign >>> getName) result

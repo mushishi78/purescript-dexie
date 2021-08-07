@@ -1,21 +1,21 @@
-module Dexie.WhereClause (
-    above,
-    aboveOrEqual,
-    anyOf,
-    anyOfIgnoreCase,
-    below,
-    belowOrEqual,
-    between,
-    equals,
-    equalsIgnoreCase,
-    inAnyRange,
-    noneOf,
-    notEqual,
-    startsWith,
-    startsWithAnyOf,
-    startsWithIgnoreCase,
-    startsWithAnyOfIgnoreCase
-) where
+module Dexie.WhereClause
+  ( above
+  , aboveOrEqual
+  , anyOf
+  , anyOfIgnoreCase
+  , below
+  , belowOrEqual
+  , between
+  , equals
+  , equalsIgnoreCase
+  , inAnyRange
+  , noneOf
+  , notEqual
+  , startsWith
+  , startsWithAnyOf
+  , startsWithIgnoreCase
+  , startsWithAnyOfIgnoreCase
+  ) where
 
 import Prelude
 
@@ -71,7 +71,7 @@ belowOrEqual upperBound whereClause = liftEffect $ _belowOrEqual (IndexedValue.t
 -- | Documentation: [dexie.org/docs/WhereClause/WhereClause.between()](https://dexie.org/docs/WhereClause/WhereClause.between())
 between :: forall v me. MonadEffect me => IndexedValue v => v -> v -> Boolean -> Boolean -> WhereClause -> me Collection
 between lowerBound upperBound includeLower includeUpper whereClause =
-    liftEffect $ _between (IndexedValue.toForeign lowerBound) (IndexedValue.toForeign upperBound) includeLower includeUpper whereClause
+  liftEffect $ _between (IndexedValue.toForeign lowerBound) (IndexedValue.toForeign upperBound) includeLower includeUpper whereClause
 
 -- | Documentation: [dexie.org/docs/WhereClause/WhereClause.equals()](https://dexie.org/docs/WhereClause/WhereClause.equals())
 equals :: forall v me. MonadEffect me => IndexedValue v => v -> WhereClause -> me Collection
@@ -84,9 +84,9 @@ equalsIgnoreCase value whereClause = liftEffect $ _equalsIgnoreCase value whereC
 -- | Documentation: [dexie.org/docs/WhereClause/WhereClause.inAnyRange()](https://dexie.org/docs/WhereClause/WhereClause.inAnyRange())
 inAnyRange :: forall v me. MonadEffect me => IndexedValue v => Array (Tuple v v) -> Boolean -> Boolean -> WhereClause -> me Collection
 inAnyRange ranges includeLowers includeUppers whereClause =
-    liftEffect $ _inAnyRange (map fn ranges) includeLowers includeUppers whereClause
+  liftEffect $ _inAnyRange (map fn ranges) includeLowers includeUppers whereClause
   where
-    fn (Tuple f s) = map IndexedValue.toForeign [f, s]
+  fn (Tuple f s) = map IndexedValue.toForeign [ f, s ]
 
 -- | Documentation: [dexie.org/docs/WhereClause/WhereClause.noneOf()](https://dexie.org/docs/WhereClause/WhereClause.noneOf())
 noneOf :: forall v me. MonadEffect me => IndexedValue v => Array v -> WhereClause -> me Collection

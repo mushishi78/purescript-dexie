@@ -1,31 +1,31 @@
-module Dexie.Collection (
-    and,
-    clone,
-    count,
-    delete,
-    distinct,
-    each,
-    eachKey,
-    eachPrimaryKey,
-    eachUniqueKey,
-    filter,
-    first,
-    keys,
-    last,
-    limit,
-    modify,
-    offset,
-    or,
-    primaryKeys,
-    raw,
-    reverse,
-    sortBy,
-    toArray,
-    uniqueKeys,
-    until,
-    modifyFn,
-    ModifyEffect(..)
-) where
+module Dexie.Collection
+  ( and
+  , clone
+  , count
+  , delete
+  , distinct
+  , each
+  , eachKey
+  , eachPrimaryKey
+  , eachUniqueKey
+  , filter
+  , first
+  , keys
+  , last
+  , limit
+  , modify
+  , offset
+  , or
+  , primaryKeys
+  , raw
+  , reverse
+  , sortBy
+  , toArray
+  , uniqueKeys
+  , until
+  , modifyFn
+  , ModifyEffect(..)
+  ) where
 
 import Prelude
 
@@ -219,27 +219,28 @@ modifyFn fn collection = modify (createModifyMapper fn) collection
 -- | Return type for [modifyFn](#v:modifyFn) to specify if you'd like to replace, ignore or delete the object
 data ModifyEffect a = ModifyReplace a | ModifyIgnore | ModifyDelete
 
-foreign import _createModifyMapper :: forall v.
-    (forall a. ModifyEffect a -> Nullable a)
-    -> (forall a. ModifyEffect a -> Boolean)
-    -> (forall a. ModifyEffect a -> Boolean)
-    -> (Foreign -> ModifyEffect v)
-    -> Foreign
+foreign import _createModifyMapper ::
+  forall v.
+  (forall a. ModifyEffect a -> Nullable a) ->
+  (forall a. ModifyEffect a -> Boolean) ->
+  (forall a. ModifyEffect a -> Boolean) ->
+  (Foreign -> ModifyEffect v) ->
+  Foreign
 
 createModifyMapper :: forall v. (Foreign -> ModifyEffect v) -> Foreign
 createModifyMapper fn = _createModifyMapper getModifyReplaceValue isModifyIgnore isModifyDelete fn
 
 getModifyReplaceValue :: forall a. ModifyEffect a -> Nullable a
 getModifyReplaceValue = toNullable <<< case _ of
-    ModifyReplace value -> Just value
-    _ -> Nothing
+  ModifyReplace value -> Just value
+  _ -> Nothing
 
 isModifyIgnore :: forall a. ModifyEffect a -> Boolean
 isModifyIgnore = case _ of
-    ModifyIgnore -> true
-    _ -> false
+  ModifyIgnore -> true
+  _ -> false
 
 isModifyDelete :: forall a. ModifyEffect a -> Boolean
 isModifyDelete = case _ of
-    ModifyDelete -> true
-    _ -> false
+  ModifyDelete -> true
+  _ -> false

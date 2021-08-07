@@ -17,4 +17,4 @@ instance indexNameArray :: IndexName (Array String) where
   toForeign = unsafeToForeign
 
 instance indexNameTuple :: IndexName (Tuple String String) where
-  toForeign (Tuple a b) = unsafeToForeign [a, b]
+  toForeign (Tuple a b) = unsafeToForeign [ a, b ]

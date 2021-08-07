@@ -25,8 +25,8 @@ withDB dbName = bracket (Dexie.new dbName) DB.close
 
 unsafeUseAff :: forall a. Aff a -> Promise a
 unsafeUseAff aff = Promise.new $ \resolve reject -> (flip $ runAff_) aff $ case _ of
-    (Left error) -> reject error
-    (Right value) -> resolve value
+  (Left error) -> reject error
+  (Right value) -> resolve value
 
 assert :: String -> Boolean -> Promise Unit
 assert reason b = unsafeUseAff $ Assert.assert reason b
