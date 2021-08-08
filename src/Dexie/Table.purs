@@ -33,7 +33,7 @@ module Dexie.Table
   , update_
   ) where
 
-import Prelude
+import Prelude hiding (add)
 
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toNullable)
