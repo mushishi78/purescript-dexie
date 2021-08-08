@@ -11,6 +11,7 @@ import Dexie.Promise (Promise, toAff)
 import Dexie.Table as Table
 import Dexie.Version as Version
 import Foreign (unsafeFromForeign)
+import Foreign.Object (fromHomogeneous)
 import Test.Helpers (assertEqual, cleanUp, withDB)
 import Test.Unit (TestSuite, suite, test)
 
@@ -34,7 +35,7 @@ versionTests = suite "version" do
     -- Migrate from 1 -> 2
     withDB "db" $ \db -> toAff do
       DB.version 2 db
-        >>= Version.stores { foo: Just "id" }
+        >>= Version.stores (fromHomogeneous { foo: Just "id" })
         >>= Version.upgrade_
           ( \_ -> do
               -- Add row to table
@@ -53,11 +54,11 @@ versionTests = suite "version" do
 
     -- Move off version 0
     withDB "db" $ \db -> toAff do
-      DB.version 1 db >>= Version.stores_ { foo: Just "++id", bar: Just "++id" }
+      DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++id", bar: Just "++id" })
       DB.open db
 
     withDB "db" $ \db -> toAff do
-      DB.version 1 db >>= Version.stores_ { foo: Just "++id", bar: Just "++id" }
+      DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++id", bar: Just "++id" })
 
       -- Migrate from 1 -> 2 slowly
       DB.version 2 db >>= Version.upgrade_
@@ -91,7 +92,7 @@ versionTests = suite "version" do
     -- Can create a table
     withDB "db" $ \db -> toAff do
       DB.version 1 db
-        >>= Version.stores_ { foo: Just "id" }
+        >>= Version.stores_ (fromHomogeneous { foo: Just "id" })
       DB.open db
 
       assertEqual [ "foo" ] =<< traverse Table.name =<< DB.tables db
@@ -99,10 +100,10 @@ versionTests = suite "version" do
     -- Can remove a table
     withDB "db" $ \db -> toAff do
       DB.version 1 db
-        >>= Version.stores_ { foo: Just "id" }
+        >>= Version.stores_ (fromHomogeneous { foo: Just "id" })
 
       DB.version 2 db
-        >>= Version.stores_ { foo: Nothing }
+        >>= Version.stores_ (fromHomogeneous { foo: Nothing })
       DB.open db
 
       assertEqual [] =<< traverse Table.name =<< DB.tables db

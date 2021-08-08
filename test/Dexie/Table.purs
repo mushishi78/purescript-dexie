@@ -9,9 +9,9 @@ import Data.Maybe (Maybe(..))
 import Data.String.Utils (startsWith)
 import Dexie.Collection as Collection
 import Dexie.DB as DB
+import Dexie.Data (Table)
 import Dexie.IndexedValue (class IndexedValue)
 import Dexie.Promise (Promise, toAff)
-import Dexie.Data (Table)
 import Dexie.Table as Table
 import Dexie.Version as Version
 import Effect (Effect)
@@ -20,6 +20,7 @@ import Effect.Exception (error, throwException)
 import Effect.Exception as Error
 import Effect.Ref as Ref
 import Foreign (unsafeFromForeign)
+import Foreign.Object (fromHomogeneous)
 import Test.Helpers (assertEqual, withCleanDB)
 import Test.Unit (TestSuite, suite, test)
 
@@ -39,7 +40,7 @@ tableTests = suite "table" do
     nothingIntArray = Nothing
 
   test "can Table.add with an inbound key" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "id" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "id" })
     foo <- DB.table "foo" db
 
     -- Add one row
@@ -51,7 +52,7 @@ tableTests = suite "table" do
     assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
 
   test "can Table.add with a non-inbound key" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "" })
     foo <- DB.table "foo" db
 
     -- Add one row
@@ -63,7 +64,7 @@ tableTests = suite "table" do
     assertEqual (Just { name: "John" }) =<< unsafeGet key foo
 
   test "can Table.add with an auto-incrementing inbound key" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++id" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++id" })
     foo <- DB.table "foo" db
 
     -- Add one row
@@ -75,7 +76,7 @@ tableTests = suite "table" do
     assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
 
   test "can Table.add with an auto-incrementing non-inbound key" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add one row
@@ -87,7 +88,7 @@ tableTests = suite "table" do
     assertEqual (Just { name: "John" }) =<< unsafeGet key foo
 
   test "can Table.bulkAdd" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -98,7 +99,7 @@ tableTests = suite "table" do
     assertEqual [ "John", "Harry", "Jane" ] =<< unsafeToArray foo
 
   test "can Table.bulkDelete" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -111,7 +112,7 @@ tableTests = suite "table" do
     assertEqual [ "Harry" ] =<< unsafeToArray foo
 
   test "can Table.bulkGet" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -124,7 +125,7 @@ tableTests = suite "table" do
     assertEqual [ Just "John", Just "Jane", Nothing ] $ map (map unsafeFromForeign) values
 
   test "can Table.bulkPut" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -137,7 +138,7 @@ tableTests = suite "table" do
     assertEqual [ "Lizzie", "Harry", "Chelsea", "Eve" ] =<< unsafeToArray foo
 
   test "can Table.clear" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -153,7 +154,7 @@ tableTests = suite "table" do
     assertEqual 0 =<< Table.count foo
 
   test "can Table.delete" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -166,7 +167,7 @@ tableTests = suite "table" do
     assertEqual [ "Harry", "Jane" ] =<< unsafeToArray foo
 
   test "can Table.each" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
 
@@ -182,7 +183,7 @@ tableTests = suite "table" do
     assertEqual "JohnHarryJane" =<< liftEffect (Ref.read ref)
 
   test "can Table.filter" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -195,7 +196,7 @@ tableTests = suite "table" do
     assertEqual [ "John", "Jane" ] $ map unsafeFromForeign values
 
   test "can set onCreating callback" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new false
 
@@ -214,7 +215,7 @@ tableTests = suite "table" do
     assertEqual true =<< liftEffect (Ref.read ref)
 
   test "can make primary key with onCreating" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "" })
     foo <- DB.table "foo" db
 
     -- Make the callback return a primary key for the row
@@ -228,7 +229,7 @@ tableTests = suite "table" do
     assertEqual (Just "John") =<< unsafeGet "key" foo
 
   test "can get the primary key with onCreating's onSuccess" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new 28
 
@@ -251,7 +252,7 @@ tableTests = suite "table" do
     assertEqual 1 =<< liftEffect (Ref.read ref)
 
   test "can set onCreating's onError" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new (error "Noop")
 
@@ -275,7 +276,7 @@ tableTests = suite "table" do
     assertEqual "Key already exists in the object store." =<< map Error.message (liftEffect (Ref.read ref))
 
   test "can fail an add by throwing in onCreating" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Make the callback throw an error
@@ -289,7 +290,7 @@ tableTests = suite "table" do
     assertEqual (Left "dont like this") $ lmap Error.message maybeError
 
   test "can unsubscribe from onCreating" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new 0
 
@@ -315,7 +316,7 @@ tableTests = suite "table" do
     assertEqual 3 =<< liftEffect (Ref.read ref)
 
   test "can set onDeleting callback" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new false
 
@@ -336,7 +337,7 @@ tableTests = suite "table" do
     assertEqual true =<< liftEffect (Ref.read ref)
 
   test "can fail a delete by throwing in onDeleting" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Make the callback throw an error
@@ -351,7 +352,7 @@ tableTests = suite "table" do
     assertEqual (Left "dont like this") $ lmap Error.message maybeError
 
   test "can get value from onReading" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
 
@@ -373,7 +374,7 @@ tableTests = suite "table" do
     assertEqual "John" =<< liftEffect (Ref.read ref)
 
   test "can modify value with onReading" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Make the callback set the ref to the row value
@@ -387,7 +388,7 @@ tableTests = suite "table" do
     assertEqual (Just "Sir John") =<< unsafeGet 1 foo
 
   test "can set onUpdating callback" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new false
 
@@ -409,7 +410,7 @@ tableTests = suite "table" do
     assertEqual true =<< liftEffect (Ref.read ref)
 
   test "can modify the modifications with onUpdating" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Make the callback modify ther modifications
@@ -427,7 +428,7 @@ tableTests = suite "table" do
     assertEqual (Just { name: "Harry", title: "Prince" }) =<< unsafeGet 1 foo
 
   test "can get the updated item with onUpdating's onSuccess" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new { name: "", title: "" }
 
@@ -453,7 +454,7 @@ tableTests = suite "table" do
     assertEqual { name: "John", title: "Sir" } =<< liftEffect (Ref.read ref)
 
   test "can Table.limit" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -466,14 +467,14 @@ tableTests = suite "table" do
     assertEqual [ "John", "Harry", "Jane" ] $ map unsafeFromForeign result
 
   test "can Table.name" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Check it equals what we'd expect
     assertEqual "foo" =<< Table.name foo
 
   test "can Table.offset" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -486,7 +487,7 @@ tableTests = suite "table" do
     assertEqual [ "Jane", "Chelsea", "Emily" ] $ map unsafeFromForeign result
 
   test "can Table.orderBy" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++, name" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++, name" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -504,7 +505,7 @@ tableTests = suite "table" do
     assertEqual [ "Chelsea", "Harry", "Jane", "John" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can Table.put to a new row" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "id" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "id" })
     foo <- DB.table "foo" db
 
     -- Put one row
@@ -516,7 +517,7 @@ tableTests = suite "table" do
     assertEqual (Just { id: 1, name: "John" }) =<< unsafeGet key foo
 
   test "can Table.put over an existing row" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "id" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "id" })
     foo <- DB.table "foo" db
 
     -- Add one row
@@ -532,7 +533,7 @@ tableTests = suite "table" do
     assertEqual 1 =<< Table.count foo
 
   test "can Table.reverse" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -545,7 +546,7 @@ tableTests = suite "table" do
     assertEqual [ "Emily", "Chelsea", "Jane", "Harry", "John" ] $ map unsafeFromForeign result
 
   test "can Table.toArray" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -558,7 +559,7 @@ tableTests = suite "table" do
     assertEqual [ "John", "Harry", "Jane", "Chelsea", "Emily" ] $ map unsafeFromForeign result
 
   test "can Table.toCollection" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows
@@ -571,7 +572,7 @@ tableTests = suite "table" do
     assertEqual [ "John", "Harry", "Jane", "Chelsea", "Emily" ] $ map unsafeFromForeign result
 
   test "can Table.update an existing row" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "id" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "id" })
     foo <- DB.table "foo" db
 
     -- Add one row
@@ -585,7 +586,7 @@ tableTests = suite "table" do
     assertEqual (Just { id: 10, name: "Sally" }) =<< unsafeGet 10 foo
 
   test "Table.update returns 0 if not successful" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "id" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "id" })
     foo <- DB.table "foo" db
 
     -- Put one row
@@ -596,7 +597,7 @@ tableTests = suite "table" do
     assertEqual (Nothing :: Maybe { id :: Int, name :: String }) =<< unsafeGet 10 foo
 
   test "can Table.whereValues" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++, [title+age]" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++, [title+age]" })
     foo <- DB.table "foo" db
 
     -- Add multiple rows

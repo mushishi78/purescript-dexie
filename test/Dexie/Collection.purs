@@ -14,6 +14,7 @@ import Dexie.WhereClause as WhereClause
 import Effect.Class (liftEffect)
 import Effect.Ref as Ref
 import Foreign (unsafeFromForeign, unsafeToForeign)
+import Foreign.Object (fromHomogeneous)
 import Test.Helpers (assertEqual, withCleanDB)
 import Test.Unit (TestSuite, suite, test)
 
@@ -31,7 +32,7 @@ collectionTests = suite "collection" do
     nothingInt = Nothing
 
   test "can Collection.and" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -45,7 +46,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Aticus", "Helena" ] $ map unsafeFromForeign result
 
   test "can Collection.clone" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -70,7 +71,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Aticus", "Jason" ] $ map unsafeFromForeign result3
 
   test "can Collection.count" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -80,7 +81,7 @@ collectionTests = suite "collection" do
     assertEqual 3 count
 
   test "can Collection.delete" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -92,7 +93,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Helena" ] =<< map (map unsafeFromForeign) (Table.toArray foo)
 
   test "can Collection.distinct" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++id, *emails" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++id, *emails" })
     foo <- DB.table "foo" db
 
     Table.add_ { name: "Jason", emails: [ "jason99@example.com", "jason_experience@example.com" ] } nothingInt foo
@@ -113,7 +114,7 @@ collectionTests = suite "collection" do
     assertEqual [ 1 ] $ map unsafeFromForeign result2
 
   test "can Collection.each" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
 
@@ -127,7 +128,7 @@ collectionTests = suite "collection" do
     assertEqual "JHJCE" =<< liftEffect (Ref.read ref)
 
   test "can Collection.eachKey" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
 
@@ -143,7 +144,7 @@ collectionTests = suite "collection" do
     assertEqual "AHJ" =<< liftEffect (Ref.read ref)
 
   test "can Collection.eachPrimaryKey" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just ",age" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just ",age" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
 
@@ -159,7 +160,7 @@ collectionTests = suite "collection" do
     assertEqual "HJA" =<< liftEffect (Ref.read ref)
 
   test "can Collection.eachUniqueKey" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++, firstName" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++, firstName" })
     foo <- DB.table "foo" db
     ref <- liftEffect $ Ref.new ""
 
@@ -177,7 +178,7 @@ collectionTests = suite "collection" do
     assertEqual "AHJ" =<< liftEffect (Ref.read ref)
 
   test "can Collection.filter" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -191,7 +192,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Aticus", "Helena" ] $ map unsafeFromForeign result
 
   test "can Collection.first" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -203,7 +204,7 @@ collectionTests = suite "collection" do
     assertEqual "Jason" $ unsafeFromForeign result
 
   test "can Collection.keys" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++, firstName, lastName" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++, firstName, lastName" })
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
@@ -220,7 +221,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Barrow", "Herron", "Stathem", "Street", "Troy" ] $ map unsafeFromForeign result
 
   test "can Collection.last" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -232,7 +233,7 @@ collectionTests = suite "collection" do
     assertEqual "Helena" $ unsafeFromForeign result
 
   test "can Collection.limit" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -244,7 +245,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Jason", "Aticus" ] $ map unsafeFromForeign result
 
   test "can Collection.modify with record" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++id" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++id" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ {}, {} ] nothingIntArray foo
@@ -256,7 +257,7 @@ collectionTests = suite "collection" do
     assertEqual [ { id: 1, old: true }, { id: 2, old: true } ] =<< map (map unsafeFromForeign) (Table.toArray foo)
 
   test "can Collection.modifyFn" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++id" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++id" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ { old: false }, { old: false }, { old: false } ] nothingIntArray foo
@@ -274,7 +275,7 @@ collectionTests = suite "collection" do
     assertEqual [ { id: 2, old: true }, { id: 3, old: false } ] =<< map (map unsafeFromForeign) (Table.toArray foo)
 
   test "can Collection.offset" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -286,7 +287,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Aticus", "Helena" ] $ map unsafeFromForeign result
 
   test "can Collection.or" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "name" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "name" })
     foo <- DB.table "foo" db
 
     Table.add_ { name: "Jason" } nothingInt foo
@@ -305,7 +306,7 @@ collectionTests = suite "collection" do
     assertEqual [ { name: "Jason" }, { name: "Aticus" } ] $ map unsafeFromForeign result
 
   test "can Collection.primaryKeys" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++, firstName, lastName" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++, firstName, lastName" })
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
@@ -322,7 +323,7 @@ collectionTests = suite "collection" do
     assertEqual [ 3, 1, 4, 2, 5 ] $ map unsafeFromForeign result
 
   test "can bypass onReading with Collection.raw" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     -- Make the callback set the ref to the row value
@@ -340,7 +341,7 @@ collectionTests = suite "collection" do
     assertEqual [ "John" ] $ map unsafeFromForeign result2
 
   test "can Collection.reverse" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++" })
     foo <- DB.table "foo" db
 
     _ <- Table.bulkAdd [ "Jason", "Aticus", "Helena" ] nothingIntArray foo
@@ -352,7 +353,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Helena", "Aticus", "Jason" ] $ map unsafeFromForeign result
 
   test "can Collection.sortBy" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "name,age" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "name,age" })
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
@@ -369,7 +370,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Helena", "Jason", "Aticus" ] $ map (unsafeFromForeign >>> getName) result
 
   test "can Collection.uniqueKeys" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++, firstName" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++, firstName" })
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
@@ -386,7 +387,7 @@ collectionTests = suite "collection" do
     assertEqual [ "Aticus", "Helena", "Jason" ] $ map unsafeFromForeign result
 
   test "can Collection.until" $ withCleanDB "db" $ \db -> toAff do
-    DB.version 1 db >>= Version.stores_ { foo: Just "++,age" }
+    DB.version 1 db >>= Version.stores_ (fromHomogeneous { foo: Just "++,age" })
     foo <- DB.table "foo" db
 
     -- Add some rows with keys
