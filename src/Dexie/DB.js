@@ -1,4 +1,4 @@
-exports._version = function (versionNumber) {
+export function _version(versionNumber) {
   return function (db) {
     return function () {
       return db.version(versionNumber)
@@ -6,7 +6,7 @@ exports._version = function (versionNumber) {
   }
 }
 
-exports._table = function (storeName) {
+export function _table(storeName) {
   return function (db) {
     return function () {
       return db.table(storeName)
@@ -14,13 +14,13 @@ exports._table = function (storeName) {
   }
 }
 
-exports._tables = function (db) {
+export function _tables(db) {
   return function () {
     return db.tables
   }
 }
 
-exports._transaction = function (db) {
+export function _transaction(db) {
   return function (mode) {
     return function (tables) {
       return function (callback) {
@@ -34,19 +34,19 @@ exports._transaction = function (db) {
   }
 }
 
-exports._open = function (db) {
+export function _open(db) {
   return function () {
     return db.open()
   }
 }
 
-exports._close = function (db) {
+export function _close(db) {
   return function () {
     return db.close()
   }
 }
 
-exports._onBlocked = function (callback) {
+export function _onBlocked(callback) {
   return function (db) {
     return function () {
       return db.on('blocked', callback)
@@ -54,7 +54,7 @@ exports._onBlocked = function (callback) {
   }
 }
 
-exports._onReady = function (callback) {
+export function _onReady(callback) {
   return function (db) {
     return function () {
       return db.on('ready', callback)
@@ -62,7 +62,7 @@ exports._onReady = function (callback) {
   }
 }
 
-exports._onVersionChange = function (callback) {
+export function _onVersionChange(callback) {
   return function (db) {
     return function () {
       return db.on('versionchange', callback)

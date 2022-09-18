@@ -1,1 +1,2 @@
-require('../output/Test.Main/index').main()
+import { main } from "../output/Test.Main/index"
+main();

@@ -1,4 +1,4 @@
-exports._above = function (lowerBound) {
+export function _above(lowerBound) {
   return function (whereClause) {
     return function () {
       return whereClause.above(lowerBound)
@@ -6,7 +6,7 @@ exports._above = function (lowerBound) {
   }
 }
 
-exports._aboveOrEqual = function (lowerBound) {
+export function _aboveOrEqual(lowerBound) {
   return function (whereClause) {
     return function () {
       return whereClause.aboveOrEqual(lowerBound)
@@ -14,7 +14,7 @@ exports._aboveOrEqual = function (lowerBound) {
   }
 }
 
-exports._anyOf = function (keys) {
+export function _anyOf(keys) {
   return function (whereClause) {
     return function () {
       return whereClause.anyOf(keys)
@@ -22,7 +22,7 @@ exports._anyOf = function (keys) {
   }
 }
 
-exports._anyOfIgnoreCase = function (keys) {
+export function _anyOfIgnoreCase(keys) {
   return function (whereClause) {
     return function () {
       return whereClause.anyOfIgnoreCase(keys)
@@ -30,7 +30,7 @@ exports._anyOfIgnoreCase = function (keys) {
   }
 }
 
-exports._below = function (upperBound) {
+export function _below(upperBound) {
   return function (whereClause) {
     return function () {
       return whereClause.below(upperBound)
@@ -38,7 +38,7 @@ exports._below = function (upperBound) {
   }
 }
 
-exports._belowOrEqual = function (upperBound) {
+export function _belowOrEqual(upperBound) {
   return function (whereClause) {
     return function () {
       return whereClause.belowOrEqual(upperBound)
@@ -46,7 +46,7 @@ exports._belowOrEqual = function (upperBound) {
   }
 }
 
-exports._between = function (lowerBound) {
+export function _between(lowerBound) {
   return function (upperBound) {
     return function (includeLower) {
       return function (includeUpper) {
@@ -60,7 +60,7 @@ exports._between = function (lowerBound) {
   }
 }
 
-exports._equals = function (key) {
+export function _equals(key) {
   return function (whereClause) {
     return function () {
       return whereClause.equals(key)
@@ -68,7 +68,7 @@ exports._equals = function (key) {
   }
 }
 
-exports._equalsIgnoreCase = function (key) {
+export function _equalsIgnoreCase(key) {
   return function (whereClause) {
     return function () {
       return whereClause.equalsIgnoreCase(key)
@@ -76,7 +76,7 @@ exports._equalsIgnoreCase = function (key) {
   }
 }
 
-exports._inAnyRange = function (ranges) {
+export function _inAnyRange(ranges) {
   return function (includeLowers) {
     return function (includeUppers) {
       return function (whereClause) {
@@ -88,7 +88,7 @@ exports._inAnyRange = function (ranges) {
   }
 }
 
-exports._noneOf = function (keys) {
+export function _noneOf(keys) {
   return function (whereClause) {
     return function () {
       return whereClause.noneOf(keys)
@@ -96,7 +96,7 @@ exports._noneOf = function (keys) {
   }
 }
 
-exports._notEqual = function (key) {
+export function _notEqual(key) {
   return function (whereClause) {
     return function () {
       return whereClause.notEqual(key)
@@ -104,7 +104,7 @@ exports._notEqual = function (key) {
   }
 }
 
-exports._startsWith = function (prefix) {
+export function _startsWith(prefix) {
   return function (whereClause) {
     return function () {
       return whereClause.startsWith(prefix)
@@ -112,7 +112,7 @@ exports._startsWith = function (prefix) {
   }
 }
 
-exports._startsWithAnyOf = function (prefixes) {
+export function _startsWithAnyOf(prefixes) {
   return function (whereClause) {
     return function () {
       return whereClause.startsWithAnyOf(prefixes)
@@ -120,7 +120,7 @@ exports._startsWithAnyOf = function (prefixes) {
   }
 }
 
-exports._startsWithIgnoreCase = function (prefix) {
+export function _startsWithIgnoreCase(prefix) {
   return function (whereClause) {
     return function () {
       return whereClause.startsWithIgnoreCase(prefix)
@@ -128,7 +128,7 @@ exports._startsWithIgnoreCase = function (prefix) {
   }
 }
 
-exports._startsWithAnyOfIgnoreCase = function (prefixes) {
+export function _startsWithAnyOfIgnoreCase(prefixes) {
   return function (whereClause) {
     return function () {
       return whereClause.startsWithAnyOfIgnoreCase(prefixes)

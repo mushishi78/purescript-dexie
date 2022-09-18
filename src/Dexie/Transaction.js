@@ -1,10 +1,10 @@
-exports._abort = function (transaction) {
+export function _abort(transaction) {
   return function () {
     return transaction.abort()
   }
 }
 
-exports._table = function (storeName) {
+export function _table(storeName) {
   return function (transaction) {
     return function () {
       return transaction.table(storeName)
