@@ -1,4 +1,4 @@
-exports._add = function (item) {
+export function _add(item) {
   return function (nullableKey) {
     return function (table) {
       return function () {
@@ -8,7 +8,7 @@ exports._add = function (item) {
   }
 }
 
-exports._bulkAdd = function (items) {
+export function _bulkAdd(items) {
   return function (nullableKeys) {
     return function (table) {
       return function () {
@@ -18,7 +18,7 @@ exports._bulkAdd = function (items) {
   }
 }
 
-exports._bulkDelete = function (keys) {
+export function _bulkDelete(keys) {
   return function (table) {
     return function () {
       return table.bulkDelete(keys)
@@ -26,7 +26,7 @@ exports._bulkDelete = function (keys) {
   }
 }
 
-exports._bulkGet = function (keys) {
+export function _bulkGet(keys) {
   return function (table) {
     return function () {
       return table.bulkGet(keys)
@@ -34,7 +34,7 @@ exports._bulkGet = function (keys) {
   }
 }
 
-exports._bulkPut = function (items) {
+export function _bulkPut(items) {
   return function (nullableKeys) {
     return function (table) {
       return function () {
@@ -44,19 +44,19 @@ exports._bulkPut = function (items) {
   }
 }
 
-exports._clear = function (table) {
+export function _clear(table) {
   return function () {
     return table.clear()
   }
 }
 
-exports._count = function (table) {
+export function _count(table) {
   return function () {
     return table.count()
   }
 }
 
-exports._delete = function (key) {
+export function _delete(key) {
   return function (table) {
     return function () {
       return table.delete(key)
@@ -64,7 +64,7 @@ exports._delete = function (key) {
   }
 }
 
-exports._each = function (callback) {
+export function _each(callback) {
   return function (table) {
     return function () {
       return table.each(function (item) {
@@ -74,7 +74,7 @@ exports._each = function (callback) {
   }
 }
 
-exports._filter = function (filterFn) {
+export function _filter(filterFn) {
   return function (table) {
     return function () {
       return table.filter(filterFn)
@@ -82,7 +82,7 @@ exports._filter = function (filterFn) {
   }
 }
 
-exports._get = function (indexQuery) {
+export function _get(indexQuery) {
   return function (table) {
     return function () {
       return table.get(indexQuery)
@@ -90,7 +90,7 @@ exports._get = function (indexQuery) {
   }
 }
 
-exports._onCreating = function (callback) {
+export function _onCreating(callback) {
   return function (table) {
     return function () {
       function listener(primaryKey, item, transaction) {
@@ -133,7 +133,7 @@ exports._onCreating = function (callback) {
   }
 }
 
-exports._onDeleting = function (callback) {
+export function _onDeleting(callback) {
   return function (table) {
     return function () {
       function listener(primaryKey, item, transaction) {
@@ -176,7 +176,7 @@ exports._onDeleting = function (callback) {
   }
 }
 
-exports._onReading = function (callback) {
+export function _onReading(callback) {
   return function (table) {
     return function () {
       function listener(item) {
@@ -192,7 +192,7 @@ exports._onReading = function (callback) {
   }
 }
 
-exports._onUpdating = function (callback) {
+export function _onUpdating(callback) {
   return function (table) {
     return function () {
       function listener(modifications, primaryKey, item, transaction) {
@@ -236,7 +236,7 @@ exports._onUpdating = function (callback) {
   }
 }
 
-exports._limit = function (n) {
+export function _limit(n) {
   return function (table) {
     return function () {
       return table.limit(n)
@@ -244,13 +244,13 @@ exports._limit = function (n) {
   }
 }
 
-exports._name = function (table) {
+export function _name(table) {
   return function () {
     return table.name
   }
 }
 
-exports._offset = function (n) {
+export function _offset(n) {
   return function (table) {
     return function () {
       return table.offset(n)
@@ -258,7 +258,7 @@ exports._offset = function (n) {
   }
 }
 
-exports._orderBy = function (index) {
+export function _orderBy(index) {
   return function (table) {
     return function () {
       return table.orderBy(index)
@@ -266,7 +266,7 @@ exports._orderBy = function (index) {
   }
 }
 
-exports._put = function (item) {
+export function _put(item) {
   return function (nullableKey) {
     return function (table) {
       return function () {
@@ -276,25 +276,25 @@ exports._put = function (item) {
   }
 }
 
-exports._reverse = function (table) {
+export function _reverse(table) {
   return function () {
     return table.reverse()
   }
 }
 
-exports._toArray = function (table) {
+export function _toArray(table) {
   return function () {
     return table.toArray()
   }
 }
 
-exports._toCollection = function (table) {
+export function _toCollection(table) {
   return function () {
     return table.toCollection()
   }
 }
 
-exports._update = function (key) {
+export function _update(key) {
   return function (changes) {
     return function (table) {
       return function () {
@@ -304,7 +304,7 @@ exports._update = function (key) {
   }
 }
 
-exports._whereClause = function (index) {
+export function _whereClause(index) {
   return function (table) {
     return function () {
       return table.where(index)
@@ -312,7 +312,7 @@ exports._whereClause = function (index) {
   }
 }
 
-exports._whereValues = function (valuesObject) {
+export function _whereValues(valuesObject) {
   return function (table) {
     return function () {
       return table.where(valuesObject)

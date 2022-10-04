@@ -14,18 +14,18 @@
         "output"
     ],
     "dependencies": {
-        "purescript-aff": "^v6.0.0",
-        "purescript-control": "^v5.0.0",
-        "purescript-effect": "^v3.0.0",
-        "purescript-either": "^v5.0.0",
-        "purescript-exceptions": "^v5.0.0",
-        "purescript-foreign": "^v6.0.1",
-        "purescript-foreign-object": "^v3.0.0",
-        "purescript-maybe": "^v5.0.0",
-        "purescript-nullable": "^v5.0.0",
-        "purescript-prelude": "^v5.0.0",
-        "purescript-psci-support": "^v5.0.0",
-        "purescript-transformers": "^v5.1.0",
-        "purescript-tuples": "^v6.0.1"
+        "purescript-aff": "^v7.1.0",
+        "purescript-control": "^v6.0.0",
+        "purescript-effect": "^v4.0.0",
+        "purescript-either": "^v6.1.0",
+        "purescript-exceptions": "^v6.0.0",
+        "purescript-foreign": "^v7.0.0",
+        "purescript-foreign-object": "^v4.0.0",
+        "purescript-maybe": "^v6.0.0",
+        "purescript-nullable": "^v6.0.0",
+        "purescript-prelude": "^v6.0.1",
+        "purescript-psci-support": "^v6.0.0",
+        "purescript-transformers": "^v6.0.0",
+        "purescript-tuples": "^v7.0.0"
     }
 }
